@@ -27,11 +27,18 @@ namespace Client.Service
             _sessionStorageService = sessionStorageService;
         }
 
-        public async Task<bool> Register(RegistrationModel user)
+        public async Task<string?> Register(RegistrationModel user)
         {
-            var response = await _client.PostAsJsonAsync(Endpoints.RegisterEndpoint
-                , user);
-            return response.IsSuccessStatusCode;
+            var response = await _client.PostAsJsonAsync(Endpoints.RegisterEndpoint, user);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return null; // Sve prošlo kako treba
+            }
+
+            // Pročitaj tekst greške iz responsa
+            var errorContent = await response.Content.ReadAsStringAsync();
+            return errorContent;
         }
     }
 }

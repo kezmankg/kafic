@@ -15,22 +15,34 @@
 Create New Author
 <hr />
 <br />
-@if (!isSuccess)
+@if (!string.IsNullOrWhiteSpace(errorMessage))
 {
-    <ErrorMessage Message="Something Went Wrong With the Operation" />
+    @errorMessage
 }
 
 
 <EditForm Model="Model" OnValidSubmit="HandleRegistration">
     <DataAnnotationsValidator />
-    <ValidationSummary />
+    @* <ValidationSummary /> *@
     <div class="form-group">
-        <label for="firstname">First Name</label>
-        <InputText @bind-Value="Model.EmailAddress" class="form-control" id="firstname" />
+        <label for="firstname">Email</label>
+        <InputText @bind-Value="Model.EmailAddress" class="form-control" id="emailaddress" />
+        <ValidationMessage For="@(() => Model.EmailAddress)" />
     </div>
     <div class="form-group">
-        <label for="lastname">Last Name</label>
-        <InputText @bind-Value="Model.Password" class="form-control" id="lastname" />
+        <label for="lastname">Sifra</label>
+        <InputText @bind-Value="Model.Password" type="password" class="form-control" id="password" />
+        <ValidationMessage For="@(() => Model.Password)" />
+    </div>
+    <div class="form-group">
+        <label for="lastname">Ime i prezime</label>
+        <InputText @bind-Value="Model.FullName" class="form-control" id="fullname" />
+        <ValidationMessage For="@(() => Model.FullName)" />
+    </div>
+    <div class="form-group">
+        <label for="lastname">Telefon</label>
+        <InputText @bind-Value="Model.PhoneNumber" class="form-control" id="PhoneNumber" />
+        <ValidationMessage For="@(() => Model.PhoneNumber)" />
     </div>
     <button class="btn btn-primary" type="submit">
         <span class="oi oi-pencil"></span>
@@ -41,14 +53,21 @@ Create New Author
 @code{
     private RegistrationModel Model = new RegistrationModel();
     private bool isSuccess = true;
+    private string? errorMessage;
 
     private async Task HandleRegistration()
     {
-        isSuccess = await _repo.Register(Model);
+        var error = await _repo.Register(Model);
 
-        if (isSuccess)
+        if (error == null)
         {
+            // Uspešno registrovan
             _navManager.NavigateTo("/login");
+        }
+        else
+        {
+            // Prikaz poruke o grešci
+            errorMessage = error;
         }
     }
 }

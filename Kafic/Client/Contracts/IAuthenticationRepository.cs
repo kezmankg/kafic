@@ -4,6 +4,6 @@ namespace Client.Contracts
 {
     public interface IAuthenticationRepository
     {
-        public Task<bool> Register(RegistrationModel user);
+        public Task<string?> Register(RegistrationModel user);
     }
 }
