@@ -1,0 +1,54 @@
+﻿@page "/Register"
+@using Blazored.Toast.Services
+@using Client.Contracts
+@using Client.Static
+@using Share.Models
+
+<h3>Register</h3>
+
+
+@inject IAuthenticationRepository _repo
+@inject NavigationManager _navManager
+@inject IToastService _toastService
+
+
+Create New Author
+<hr />
+<br />
+@if (!isSuccess)
+{
+    <ErrorMessage Message="Something Went Wrong With the Operation" />
+}
+
+
+<EditForm Model="Model" OnValidSubmit="HandleRegistration">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="form-group">
+        <label for="firstname">First Name</label>
+        <InputText @bind-Value="Model.EmailAddress" class="form-control" id="firstname" />
+    </div>
+    <div class="form-group">
+        <label for="lastname">Last Name</label>
+        <InputText @bind-Value="Model.Password" class="form-control" id="lastname" />
+    </div>
+    <button class="btn btn-primary" type="submit">
+        <span class="oi oi-pencil"></span>
+        Create Author
+    </button>
+</EditForm>
+
+@code{
+    private RegistrationModel Model = new RegistrationModel();
+    private bool isSuccess = true;
+
+    private async Task HandleRegistration()
+    {
+        isSuccess = await _repo.Register(Model);
+
+        if (isSuccess)
+        {
+            _navManager.NavigateTo("/login");
+        }
+    }
+}
