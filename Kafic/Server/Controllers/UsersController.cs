@@ -35,8 +35,25 @@ namespace Server.Controllers
         public async Task<IActionResult> Register([FromBody] RegistrationModel userDTO)
         {
             var location = GetControllerActionNames();
+            using var transaction = await _db.Database.BeginTransactionAsync();
             try
             {
+                //Dodavanje kafica
+                Caffe caffe = new Caffe
+                {
+                    Name = userDTO.CaffeName,
+                    TablesNo = userDTO.TablesNo,
+                    SunLoungersNo = userDTO.SunLoungersNo
+                };
+                _db.Caffes.Add(caffe);
+                var changes = await _db.SaveChangesAsync();
+
+                if (changes < 1)
+                {
+                    await transaction.RollbackAsync();
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, "Doslo je do greske prilikom kreiranja kafica");
+                }
+
                 //Dodavanje rola ako ne postoje
                 if (!await roleManager.RoleExistsAsync("Administrator"))
                 {
@@ -56,6 +73,7 @@ namespace Server.Controllers
                     await roleManager.CreateAsync(role);
                 }
 
+                //Dodavanje usera
                 var username = userDTO.EmailAddress;
                 var password = userDTO.Password;
 
@@ -65,6 +83,7 @@ namespace Server.Controllers
                     UserName = username,
                     PhoneNumber = userDTO.PhoneNumber,
                     FullName = userDTO.FullName,
+                    CaffeId = caffe.Id
                 };
                 var result = await _userManager.CreateAsync(user, password);
 
@@ -75,15 +94,22 @@ namespace Server.Controllers
                     {
                         sb.AppendLine($" {error.Description}; ");
                     }
+                    await transaction.RollbackAsync();
                     return await InternalErrorAsync($"Doslo je do sledecih problema: " + sb.ToString(), location, $"{username} User Registration Attempt Failed: " + sb.ToString());
-                }
+                }               
+
+                //Dodavanje rola za usera
                 await _userManager.AddToRoleAsync(user, "Waiter");
                 await _userManager.AddToRoleAsync(user, "Administrator");
-                
+
+                // Commit transakcije
+                await transaction.CommitAsync();
+
                 return Created("login", new { result.Succeeded });
             }
             catch (Exception e)
             {
+                await transaction.RollbackAsync();
                 return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
             }
 

@@ -5,7 +5,7 @@ namespace Server.Controllers
 {
     public abstract class BaseController : ControllerBase
     {
-        private readonly ApplicationDbContext _db;
+        protected readonly ApplicationDbContext _db;
         protected BaseController(ApplicationDbContext db)
         {
             _db = db;

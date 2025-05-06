@@ -22,5 +22,13 @@ namespace Share.Models
         public string FullName { get; set; } = string.Empty;
         [Display(Name = "Telefon")]
         public string PhoneNumber { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Obavezno polje")]
+        [Display(Name = "Ime Kafica")]
+        public string CaffeName { get; set; } = string.Empty;
+        [Range(0, 1000, ErrorMessage = "Broj stolova biti veci ili jednak nuli")]
+        public int TablesNo { get; set; }
+        [Range(0, 1000, ErrorMessage = "Broj lezaljki biti veci ili jednak nuli")]
+        public int SunLoungersNo { get; set; }
     }
 }

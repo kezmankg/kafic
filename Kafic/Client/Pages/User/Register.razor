@@ -44,6 +44,22 @@ Create New Author
         <InputText @bind-Value="Model.PhoneNumber" class="form-control" id="PhoneNumber" />
         <ValidationMessage For="@(() => Model.PhoneNumber)" />
     </div>
+    <div class="form-group">
+        <label for="lastname">Ime Kafica</label>
+        <InputText @bind-Value="Model.CaffeName" class="form-control" id="CaffeName" />
+        <ValidationMessage For="@(() => Model.CaffeName)" />
+    </div>
+
+    <div class="form-group">
+        <label for="CaffeSeats">Broj Stolova</label>
+        <InputNumber @bind-Value="Model.TablesNo" class="form-control" id="TablesNo" />
+        <ValidationMessage For="@(() => Model.TablesNo)" />
+    </div>
+    <div class="form-group">
+        <label for="CaffeSeats">Broj Lezaljki</label>
+        <InputNumber @bind-Value="Model.SunLoungersNo" class="form-control" id="SunLoungersNo" />
+        <ValidationMessage For="@(() => Model.SunLoungersNo)" />
+    </div>
     <button class="btn btn-primary" type="submit">
         <span class="oi oi-pencil"></span>
         Create Author
