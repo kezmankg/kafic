@@ -5,8 +5,12 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using Server.Data;
 using Share.Models;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 
 namespace Server.Controllers
@@ -18,15 +22,18 @@ namespace Server.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> roleManager;
+        private readonly IConfiguration _config;
 
         public UsersController(ApplicationDbContext db, 
             SignInManager<ApplicationUser> signInManager,
             UserManager<ApplicationUser> userManager,
-            RoleManager<IdentityRole> roleManager) : base(db)
+            RoleManager<IdentityRole> roleManager,
+            IConfiguration config) : base(db)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             this.roleManager = roleManager;
+            _config = config;
         }
 
         [Route("register")]
@@ -113,6 +120,62 @@ namespace Server.Controllers
                 return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
             }
 
+        }
+
+        [Route("login")]
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<IActionResult> Login([FromBody] LoginModel userDTO)
+        {
+            var location = GetControllerActionNames();
+            try
+            {
+                var username = userDTO.EmailAddress;
+                var password = userDTO.Password;
+                var user = await _userManager.FindByEmailAsync(username);
+                if (user == null)
+                {
+                    return this.Unauthorized("No user found for userName:" + username);
+                }
+
+                var result = await _signInManager.PasswordSignInAsync(username, password, false, false);
+
+                if (result.Succeeded)
+                {
+                    var tokenString = await GenerateJSONWebToken(user);
+                    return Ok(new { token = tokenString });
+                }
+
+                return Unauthorized(userDTO);
+            }
+            catch (Exception e)
+            {
+                return await InternalErrorAsync("Doslo je do greske prilikom logovanja, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
+            }
+        }
+
+        private async Task<string> GenerateJSONWebToken(ApplicationUser user)
+        {
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var claims = new List<Claim>
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.Id)
+            };
+            var roles = await _userManager.GetRolesAsync(user);
+            claims.AddRange(roles.Select(r => new Claim(ClaimsIdentity.DefaultRoleClaimType, r)));
+
+            var token = new JwtSecurityToken(_config["Jwt:Issuer"]
+                , _config["Jwt:Issuer"],
+                claims,
+                null,
+                expires: DateTime.Now.AddHours(21),
+                signingCredentials: credentials
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
     }

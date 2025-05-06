@@ -1,0 +1,65 @@
+﻿@page "/login"
+
+@using Blazored.Toast.Services
+@using Client.Contracts
+@using Client.Static
+@using Share.Models
+
+<h3>Login</h3>
+
+
+@inject IAuthenticationRepository _repo
+@inject NavigationManager _navManager
+@inject IToastService _toastService
+
+
+Login
+<hr />
+<br />
+@if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    @errorMessage
+}
+
+
+<EditForm Model="Model" OnValidSubmit="HandleLogin">
+    <DataAnnotationsValidator />
+    @* <ValidationSummary /> *@
+    <div class="form-group">
+        <label for="firstname">Email</label>
+        <InputText @bind-Value="Model.EmailAddress" class="form-control" id="emailaddress" />
+        <ValidationMessage For="@(() => Model.EmailAddress)" />
+    </div>
+    <div class="form-group">
+        <label for="lastname">Sifra</label>
+        <InputText @bind-Value="Model.Password" type="password" class="form-control" id="password" />
+        <ValidationMessage For="@(() => Model.Password)" />
+    </div>
+   
+    <button class="btn btn-primary" type="submit">
+        <span class="oi oi-pencil"></span>
+        Create Author
+    </button>
+</EditForm>
+
+@code {
+    private LoginModel Model = new LoginModel();
+    private bool isSuccess = true;
+    private string? errorMessage;
+
+    private async Task HandleLogin()
+    {
+        var result = await _repo.Login(Model);
+
+        if (result)
+        {
+            // Uspešno logovan
+            _navManager.NavigateTo("/");
+        }
+        else
+        {
+            // Prikaz poruke o grešci
+            errorMessage = "Neka poruka o gresci";
+        }
+    }
+}

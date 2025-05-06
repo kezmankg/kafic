@@ -8,5 +8,6 @@
         public static string BaseUrl = "";
 #endif
         public static string RegisterEndpoint = $"{BaseUrl}api/users/register/";
+        public static string LoginEndpoint = $"{BaseUrl}api/users/login/";
     }
 }

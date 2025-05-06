@@ -1,0 +1,32 @@
+﻿@page "/"
+<h3>Index</h3>
+<AuthorizeView>
+    <Authorized>
+        test
+    </Authorized>
+    <NotAuthorized>
+        test1
+    </NotAuthorized>
+</AuthorizeView>
+@testStr
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    public string testStr { get; set; }
+    protected override async Task OnParametersSetAsync()
+    {
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            testStr = "logovan";
+        }
+        else
+        {
+            testStr = "nije logovan";
+        }
+
+    }
+}

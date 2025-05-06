@@ -31,4 +31,16 @@ namespace Share.Models
         [Range(0, 1000, ErrorMessage = "Broj lezaljki biti veci ili jednak nuli")]
         public int SunLoungersNo { get; set; }
     }
+
+    public class LoginModel
+    {
+        [Required(ErrorMessage = "Obavezno polje")]
+        [EmailAddress(ErrorMessage = "Email nije validan")]
+        [Display(Name = "Email")]
+        public string EmailAddress { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Obavezno polje")]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = string.Empty;
+        
+    }
 }

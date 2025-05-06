@@ -6,6 +6,9 @@ using Share.Models;
 using System.Net.Http.Json;
 using System.Net;
 using Client.Static;
+using Client.Providers;
+using Newtonsoft.Json;
+using System.Net.Http.Headers;
 
 namespace Client.Service
 {
@@ -39,6 +42,31 @@ namespace Client.Service
             // Pročitaj tekst greške iz responsa
             var errorContent = await response.Content.ReadAsStringAsync();
             return errorContent;
+        }
+
+        public async Task<bool> Login(LoginModel user)
+        {
+            var response = await _client.PostAsJsonAsync(Endpoints.LoginEndpoint, user);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return false;
+            }
+
+            var content = await response.Content.ReadAsStringAsync();
+            var token = JsonConvert.DeserializeObject<TokenResponse>(content);
+
+            //Store Token
+            await _localStorage.SetItemAsync("authToken", token.Token);
+
+            //Change auth state of app
+            await ((ApiAuthenticationStateProvider)_authenticationStateProvider)
+                .LoggedIn();
+
+            _client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("bearer", token.Token);
+
+            return true;
         }
     }
 }
