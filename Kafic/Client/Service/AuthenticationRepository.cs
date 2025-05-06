@@ -68,5 +68,13 @@ namespace Client.Service
 
             return true;
         }
+
+        public async Task Logout()
+        {
+            await _localStorage.RemoveItemAsync("authToken");
+            ((ApiAuthenticationStateProvider)_authenticationStateProvider)
+                .LoggedOut();
+            await _sessionStorageService.ClearAsync();
+        }
     }
 }
