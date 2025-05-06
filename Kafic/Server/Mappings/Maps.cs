@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Server.Data;
+using Share.Models;
 
 namespace Server.Mappings
 {
@@ -6,7 +8,7 @@ namespace Server.Mappings
     {
         public Maps()
         {
-            //CreateMap<RoleCompany, RoleCompanyDTO>().ReverseMap();
+            CreateMap<Caffe, CompanyModel>().ReverseMap();
         }
     }
 }

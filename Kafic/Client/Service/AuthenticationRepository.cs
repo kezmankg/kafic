@@ -76,5 +76,19 @@ namespace Client.Service
                 .LoggedOut();
             await _sessionStorageService.ClearAsync();
         }
+
+        public async Task<CompanyModel> GetCompanyPerEmail(string email)
+        {
+            _client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("bearer", await GetBearerToken());
+
+            var reponse = await _client.GetFromJsonAsync<CompanyModel>(Endpoints.GetCompanyEndpoint + email);
+            return reponse;
+        }
+
+        private async Task<string> GetBearerToken()
+        {
+            return await _localStorage.GetItemAsync<string>("authToken");
+        }
     }
 }

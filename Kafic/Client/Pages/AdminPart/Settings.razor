@@ -1,0 +1,91 @@
+﻿@page "/settings"
+@using Blazored.Toast.Services
+@using Client.Contracts
+@using Client.Static
+@using Share.Models
+
+<h3>Settings</h3>
+
+
+@inject IAuthenticationRepository _repo
+@inject NavigationManager _navManager
+@inject IToastService _toastService
+
+
+<AuthorizeView Roles="Administrator">
+    <Authorized>
+        Settings
+        <hr />
+        <br />
+        @if (!string.IsNullOrWhiteSpace(errorMessage))
+        {
+            @errorMessage
+        }
+
+
+        <EditForm Model="Model" OnValidSubmit="HandleSettingsCompany" Context="EditForm">
+            <DataAnnotationsValidator />
+            <div class="form-group">
+                <label for="lastname">Ime Kafica</label>
+                <InputText @bind-Value="Model.Name" class="form-control" id="Name" />
+                <ValidationMessage For="@(() => Model.Name)" />
+            </div>
+
+            <div class="form-group">
+                <label for="CaffeSeats">Broj Stolova</label>
+                <InputNumber @bind-Value="Model.TablesNo" class="form-control" id="TablesNo" />
+                <ValidationMessage For="@(() => Model.TablesNo)" />
+            </div>
+            <div class="form-group">
+                <label for="CaffeSeats">Broj Lezaljki</label>
+                <InputNumber @bind-Value="Model.SunLoungersNo" class="form-control" id="SunLoungersNo" />
+                <ValidationMessage For="@(() => Model.SunLoungersNo)" />
+            </div>
+            <button class="btn btn-primary" type="submit">
+                <span class="oi oi-pencil"></span>
+                Create Author
+            </button>
+        </EditForm>
+
+    </Authorized>
+    <NotAuthorized>
+        <p>Nemate pristup ovoj stranici.</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+
+@code {
+    private CompanyModel Model = new CompanyModel();
+    private bool isSuccess = true;
+    private string? errorMessage;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var userName = user.Identity.Name;
+            Model = await _repo.GetCompanyPerEmail(user.Identity.Name);
+        }
+    }
+    private async Task HandleSettingsCompany()
+    {
+        // var error = await _repo.Register(Model);
+
+        // if (error == null)
+        // {
+        //     // Uspešno registrovan
+        //     _navManager.NavigateTo("/login");
+        // }
+        // else
+        // {
+        //     // Prikaz poruke o grešci
+        //     errorMessage = error;
+        // }
+    }
+}

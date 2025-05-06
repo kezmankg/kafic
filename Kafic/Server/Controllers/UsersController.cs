@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
@@ -22,18 +24,21 @@ namespace Server.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> roleManager;
+        private readonly IMapper _mapper;
         private readonly IConfiguration _config;
 
         public UsersController(ApplicationDbContext db, 
             SignInManager<ApplicationUser> signInManager,
             UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
+            IMapper mapper,
             IConfiguration config) : base(db)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             this.roleManager = roleManager;
             _config = config;
+            _mapper = mapper;
         }
 
         [Route("register")]
@@ -152,6 +157,39 @@ namespace Server.Controllers
             {
                 return await InternalErrorAsync("Doslo je do greske prilikom logovanja, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
             }
+        }
+
+        //[Authorize(Roles = "Administrator")]
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpGet("getCompany/{email}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetCompanyPerEmail(string email)
+        {
+            var location = GetControllerActionNames();
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user == null)
+                {
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, 
+                        "user ne postoji");
+                }
+                var caffe = await _db.Caffes.FirstOrDefaultAsync(q => q.Id == user.CaffeId);
+                if (caffe == null)
+                {
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                        "caffe ne postoji");
+                }
+                var response = _mapper.Map<CompanyModel>(caffe);
+
+                return Ok(response);
+            }
+            catch (Exception e)
+            {
+                return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
+            }
+            
         }
 
         private async Task<string> GenerateJSONWebToken(ApplicationUser user)
