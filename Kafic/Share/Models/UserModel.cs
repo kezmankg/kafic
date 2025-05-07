@@ -43,4 +43,24 @@ namespace Share.Models
         public string Password { get; set; } = string.Empty;
         
     }
+
+    public class RegistrationUserModel
+    {
+        public Guid Id { get; set; }
+        [Required(ErrorMessage = "Obavezno polje")]
+        [EmailAddress(ErrorMessage = "Email nije validan")]
+        [Display(Name = "Email")]
+        public string Email { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Obavezno polje")]
+        [DataType(DataType.Password)]
+        [StringLength(15, ErrorMessage = "Sifra mora imati najmanje 3 karaktera, a maksimalno 15 karaktera", MinimumLength = 3)]
+        public string Password { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Obavezno polje")]
+        [Display(Name = "Ime i prezime")]
+        public string FullName { get; set; } = string.Empty;
+        [Display(Name = "Telefon")]
+        public string PhoneNumber { get; set; } = string.Empty;
+
+        public string AdminEmail { get; set; } = string.Empty;
+    }
 }

@@ -1,0 +1,124 @@
+﻿@page "/Users"
+@using Blazored.Toast.Services
+@using Client.Contracts
+@using Client.Static
+@using Share.Models
+
+<h3>Users</h3>
+
+
+@inject IAuthenticationRepository _repo
+@inject NavigationManager _navManager
+@inject IToastService _toastService
+
+
+
+<AuthorizeView Roles="Administrator">
+    <Authorized>
+
+        Create New User
+        <hr />
+        <br />
+        @if (!string.IsNullOrWhiteSpace(errorMessage))
+        {
+            @errorMessage
+        }
+
+
+        <EditForm Model="Model" OnValidSubmit="HandleRegistration" Context="EditForm">
+            <DataAnnotationsValidator />
+            @* <ValidationSummary /> *@
+            <div class="form-group">
+                <label for="firstname">Email</label>
+                <InputText @bind-Value="Model.Email" class="form-control" id="emailaddress" />
+                <ValidationMessage For="@(() => Model.Email)" />
+            </div>
+            <div class="form-group">
+                <label for="lastname">Sifra</label>
+                <InputText @bind-Value="Model.Password" type="password" class="form-control" id="password" />
+                <ValidationMessage For="@(() => Model.Password)" />
+            </div>
+            <div class="form-group">
+                <label for="lastname">Ime i prezime</label>
+                <InputText @bind-Value="Model.FullName" class="form-control" id="fullname" />
+                <ValidationMessage For="@(() => Model.FullName)" />
+            </div>
+            <div class="form-group">
+                <label for="lastname">Telefon</label>
+                <InputText @bind-Value="Model.PhoneNumber" class="form-control" id="PhoneNumber" />
+                <ValidationMessage For="@(() => Model.PhoneNumber)" />
+            </div>
+
+            <button class="btn btn-primary" type="submit">
+                <span class="oi oi-pencil"></span>
+                Create Author
+            </button>
+        </EditForm>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Telefon</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in AllUsers)
+                {
+                    <tr>
+                        <td>@user.Id</td>
+                        <td>@user.FullName</td>
+                        <td>@user.Email</td>
+                        <td>@user.PhoneNumber</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </Authorized>
+    <NotAuthorized>
+        <p>Nemate pristup ovoj stranici.</p>
+    </NotAuthorized>
+</AuthorizeView>
+@code {
+    private RegistrationUserModel Model = new RegistrationUserModel();
+    private bool isSuccess = true;
+    private string? errorMessage;
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    private IList<RegistrationUserModel> AllUsers = new List<RegistrationUserModel>();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var userName = user.Identity.Name;
+            AllUsers = await _repo.GetAllUsers(user.Identity.Name);
+        }
+    }
+
+    private async Task HandleRegistration()
+    {       
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+        var userName = user.Identity.Name;
+        Model.AdminEmail = userName;
+
+        var error = await _repo.RegisterUser(Model);
+        if (error == null)
+        {
+            Model = new RegistrationUserModel();
+            errorMessage = "";
+            AllUsers = await _repo.GetAllUsers(userName);
+
+        }
+        else
+        {
+            errorMessage = error;
+        }
+    }
+}

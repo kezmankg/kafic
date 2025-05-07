@@ -11,5 +11,7 @@
         public static string LoginEndpoint = $"{BaseUrl}api/users/login/";
         public static string GetCompanyEndpoint = $"{BaseUrl}api/users/getCompany/";
         public static string UpdateCompanyEndpoint = $"{BaseUrl}api/users/updateCompany/";
+        public static string RegisterUserEndpoint = $"{BaseUrl}api/users/registerUser/";
+        public static string GetAllUsersEndpoint = $"{BaseUrl}api/users/getAllUsers/";
     }
 }

@@ -9,6 +9,7 @@ namespace Server.Mappings
         public Maps()
         {
             CreateMap<Caffe, CompanyModel>().ReverseMap();
+            CreateMap<ApplicationUser, RegistrationUserModel>().ReverseMap();
         }
     }
 }

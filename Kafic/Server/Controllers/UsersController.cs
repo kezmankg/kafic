@@ -236,6 +236,84 @@ namespace Server.Controllers
             }
         }
 
+        [Route("registerUser")]
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<IActionResult> RegisterUser([FromBody] RegistrationUserModel userDTO)
+        {
+            var location = GetControllerActionNames();
+            try
+            {              
+                //Dodavanje usera
+                var username = userDTO.Email;
+                var password = userDTO.Password;
+
+                var userAdmin = await _userManager.FindByEmailAsync(userDTO.AdminEmail);
+                if (userAdmin == null)
+                {
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                        "user ne postoji");
+                }
+
+                var user = new ApplicationUser
+                {
+                    Email = username,
+                    UserName = username,
+                    PhoneNumber = userDTO.PhoneNumber,
+                    FullName = userDTO.FullName,
+                    CaffeId = userAdmin.CaffeId
+                };
+                var result = await _userManager.CreateAsync(user, password);
+
+                if (!result.Succeeded)
+                {
+                    var sb = new StringBuilder();
+                    foreach (var error in result.Errors)
+                    {
+                        sb.AppendLine($" {error.Description}; ");
+                    }
+                    return await InternalErrorAsync($"Doslo je do sledecih problema: " + sb.ToString(), location, $"{username} User Registration Attempt Failed: " + sb.ToString());
+                }
+
+                //Dodavanje rola za usera
+                await _userManager.AddToRoleAsync(user, "Waiter");
+
+                return Created("login", new { result.Succeeded });
+            }
+            catch (Exception e)
+            {
+                return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
+            }
+
+        }
+
+        [HttpGet("getAllUsers/{email}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetTeamCategoriesTenant(string email)
+        {
+            var location = GetControllerActionNames();
+            try
+            {
+                var userAdmin = await _userManager.FindByEmailAsync(email);
+                if (userAdmin == null)
+                {
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                        "user ne postoji");
+                }
+
+                var users = await _db.Users.Where(q => q.CaffeId == userAdmin.CaffeId).ToListAsync();
+
+                var response = _mapper.Map<IList<RegistrationUserModel>>(users);
+                return Ok(response);
+            }
+            catch (Exception e)
+            {
+                return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
+            }
+
+        }
+
         private async Task<string> GenerateJSONWebToken(ApplicationUser user)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));

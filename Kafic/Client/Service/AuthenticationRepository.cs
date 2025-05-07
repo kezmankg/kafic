@@ -94,6 +94,31 @@ namespace Client.Service
             return response.IsSuccessStatusCode;
         }
 
+        public async Task<string?> RegisterUser(RegistrationUserModel user)
+        {
+            _client.DefaultRequestHeaders.Authorization =
+               new AuthenticationHeaderValue("bearer", await GetBearerToken());
+            var response = await _client.PostAsJsonAsync(Endpoints.RegisterUserEndpoint, user);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return null; // Sve prošlo kako treba
+            }
+
+            // Pročitaj tekst greške iz responsa
+            var errorContent = await response.Content.ReadAsStringAsync();
+            return errorContent;
+        }
+
+        public async Task<IList<RegistrationUserModel>> GetAllUsers(string email)
+        {
+            _client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("bearer", await GetBearerToken());
+
+            var reponse = await _client.GetFromJsonAsync<IList<RegistrationUserModel>>(Endpoints.GetAllUsersEndpoint + email);
+            return reponse;
+        }
+
         private async Task<string> GetBearerToken()
         {
             return await _localStorage.GetItemAsync<string>("authToken");
