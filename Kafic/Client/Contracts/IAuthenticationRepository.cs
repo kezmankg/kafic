@@ -8,5 +8,6 @@ namespace Client.Contracts
         public Task<bool> Login(LoginModel user);
         public Task Logout();
         public Task<CompanyModel> GetCompanyPerEmail(string email);
+        public Task<bool> UpdateCompany(CompanyModel companyModel);
     }
 }

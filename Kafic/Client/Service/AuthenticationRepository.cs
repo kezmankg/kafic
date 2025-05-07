@@ -86,6 +86,14 @@ namespace Client.Service
             return reponse;
         }
 
+        public async Task<bool> UpdateCompany(CompanyModel companyModel)
+        {
+            _client.DefaultRequestHeaders.Authorization =
+               new AuthenticationHeaderValue("bearer", await GetBearerToken());
+            var response = await _client.PutAsJsonAsync(Endpoints.UpdateCompanyEndpoint, companyModel);
+            return response.IsSuccessStatusCode;
+        }
+
         private async Task<string> GetBearerToken()
         {
             return await _localStorage.GetItemAsync<string>("authToken");

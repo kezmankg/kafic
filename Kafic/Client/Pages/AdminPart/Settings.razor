@@ -17,9 +17,9 @@
         Settings
         <hr />
         <br />
-        @if (!string.IsNullOrWhiteSpace(errorMessage))
+        @if (!string.IsNullOrWhiteSpace(message))
         {
-            @errorMessage
+            @message
         }
 
 
@@ -57,7 +57,7 @@
 @code {
     private CompanyModel Model = new CompanyModel();
     private bool isSuccess = true;
-    private string? errorMessage;
+    private string? message;
 
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
@@ -75,17 +75,17 @@
     }
     private async Task HandleSettingsCompany()
     {
-        // var error = await _repo.Register(Model);
+        var response = await _repo.UpdateCompany(Model);
 
-        // if (error == null)
-        // {
-        //     // Uspešno registrovan
-        //     _navManager.NavigateTo("/login");
-        // }
-        // else
-        // {
-        //     // Prikaz poruke o grešci
-        //     errorMessage = error;
-        // }
+        if (response)
+        {
+            // Uspešno promenjeno
+            message = "Usepesno promenjeno";
+        }
+        else
+        {
+            // Prikaz poruke o grešci
+            message = "error";
+        }
     }
 }

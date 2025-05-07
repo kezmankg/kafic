@@ -6,14 +6,17 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Server.Data;
 using Share.Models;
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Server.Controllers
 {
@@ -190,6 +193,47 @@ namespace Server.Controllers
                 return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
             }
             
+        }
+
+        [Route("updateCompany")]
+        [HttpPut]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> ChangeCompany(CompanyModel companyModel)
+        {
+            var location = GetControllerActionNames();
+            try
+            {
+                var caffe = await _db.Caffes.FirstOrDefaultAsync(q => q.Id == companyModel.Id);
+                if (caffe == null)
+                {
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                        "caffe ne postoji");
+                }
+
+                caffe.Name = companyModel.Name;
+                caffe.TablesNo = companyModel.TablesNo;
+                caffe.SunLoungersNo = companyModel.SunLoungersNo;
+
+                _db.Caffes.Update(caffe);
+
+                var changes = await _db.SaveChangesAsync();
+
+                if (changes > 0)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                        "update caffe-a");
+                }
+            }
+            catch (Exception e)
+            {
+                return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
+            }
         }
 
         private async Task<string> GenerateJSONWebToken(ApplicationUser user)
