@@ -11,6 +11,7 @@ namespace Server.Mappings
             CreateMap<Caffe, CompanyModel>().ReverseMap();
             CreateMap<ApplicationUser, RegistrationUserModel>().ReverseMap();
             CreateMap<ApplicationUser, RegistrationUserModelEdit>().ReverseMap();
+            CreateMap<Group, GroupModel>().ReverseMap();
         }
     }
 }

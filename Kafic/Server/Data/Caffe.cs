@@ -10,5 +10,6 @@ namespace Server.Data
         public int TablesNo { get; set; }
         public int SunLoungersNo { get; set; }
         public virtual IList<ApplicationUser> ApplicationUsers { get; set; } = new List<ApplicationUser>();
+        public virtual IList<Group> Groups { get; set; } = new List<Group>();
     }
 }

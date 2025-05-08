@@ -17,5 +17,8 @@
         public static string GetUserByIdEndpoint = $"{BaseUrl}api/users/getUser/";
         public static string UpdateUserEndpoint = $"{BaseUrl}api/users/updateUser/";
         public static string UpdateUserPasswordEndpoint = $"{BaseUrl}api/users/updateUserPassword/";
+
+        public static string AddGroupEndpoint = $"{BaseUrl}api/article/addGroup/";
+        public static string GetAllGroupsEndpoint = $"{BaseUrl}api/article/getAllGroups/";
     }
 }

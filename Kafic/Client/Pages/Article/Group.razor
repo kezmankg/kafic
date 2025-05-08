@@ -1,0 +1,133 @@
+﻿@page "/Group"
+@using Blazored.Toast.Services
+@using Client.Contracts
+@using Client.Static
+@using Share.Models
+
+<h3>Users</h3>
+
+
+@inject IAuthenticationRepository _repo
+@inject IArticleRepository _repoArticle
+@inject NavigationManager _navManager
+@inject IToastService _toastService
+
+
+
+<AuthorizeView Roles="Administrator">
+    <Authorized>
+
+        Create New User
+        <hr />
+        <br />
+        @if (!string.IsNullOrWhiteSpace(errorMessage))
+        {
+            @errorMessage
+        }
+
+
+        <EditForm Model="Model" OnValidSubmit="HandleRegistration" Context="EditForm">
+            <DataAnnotationsValidator />
+            @* <ValidationSummary /> *@
+            <div class="form-group">
+                <label for="firstname">Name</label>
+                <InputText @bind-Value="Model.Name" class="form-control" id="emailaddress" />
+                <ValidationMessage For="@(() => Model.Name)" />
+            </div>         
+
+            <button class="btn btn-primary" type="submit">
+                <span class="oi oi-pencil"></span>
+                Create Author
+            </button>
+        </EditForm>
+        <br />
+        OVO RADI POSLE KAO I DODAVANJE FUNKCIJE
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Ime Grupe</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var group in AllGroups)
+                {
+                    <tr>
+                        <td>@group.Name</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm" @onclick="@(() => Edit(group.Id))">Izmeni</button>
+                            <button class="btn btn-danger btn-sm" @onclick="@(() => Delete(group.Id))">Obriši</button>
+
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </Authorized>
+    <NotAuthorized>
+        <p>Nemate pristup ovoj stranici.</p>
+    </NotAuthorized>
+</AuthorizeView>
+@code {
+    private GroupModel Model = new GroupModel();
+    private bool isSuccess = true;
+    private string? errorMessage;
+    private string userEmail = string.Empty;
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    private IList<GroupModel> AllGroups = new List<GroupModel>();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            userEmail = user.Identity.Name;
+            AllGroups = await _repoArticle.GetAllGroup(user.Identity.Name);
+        }
+    }
+
+    private async Task HandleRegistration()
+    {
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+        var userName = user.Identity.Name;
+        Model.AdminEmail = userName;
+
+        var result = await _repoArticle.AddGroup(Model);
+        if (result)
+        {
+            Model = new GroupModel();
+            errorMessage = "";
+            AllGroups = await _repoArticle.GetAllGroup(user.Identity.Name);
+
+        }
+        else
+        {
+            errorMessage = "Greska kod dodavanja grupe";
+        }
+    }
+
+    private void Edit(int id)
+    {
+        _navManager.NavigateTo($"/EditGroup/{id}");
+    }
+
+    private async Task Delete(int id)
+    {
+        // var error = await _repo.DeleteUser(id);
+        // if (error)
+        // {
+        //     errorMessage = "";
+        //     AllGroups = await _repoArticle.GetAllGroup(userEmail);
+
+        // }
+        // else
+        // {
+        //     errorMessage = "Greska pri brisanju";
+        // }
+    }
+}
