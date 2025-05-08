@@ -16,6 +16,7 @@ using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Transactions;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Server.Controllers
@@ -407,6 +408,43 @@ namespace Server.Controllers
                     return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
                         "update caffe-a");
                 }
+            }
+            catch (Exception e)
+            {
+                return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
+            }
+        }
+
+        [Route("updateUserPassword")]
+        [HttpPut]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UpdateUserPassword(RegistrationUserModelEditPassword model)
+        {
+            var location = GetControllerActionNames();
+            try
+            {
+                var user = await _userManager.FindByIdAsync(model.Id.ToString());
+
+                if (user == null)
+                {
+                    return NotFound();
+                }
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var result = await _userManager.ResetPasswordAsync(user, token, model.Password);
+                if (!result.Succeeded)
+                {
+                    var sb = new StringBuilder();
+                    foreach (var error in result.Errors)
+                    {
+                        sb.AppendLine($" {error.Description}; ");
+                    }
+                    return await InternalErrorAsync($"Doslo je do sledecih problema: " + sb.ToString(), location, $"{model.Password} User Reset password: " + sb.ToString());
+                }
+
+                return Ok();
+
             }
             catch (Exception e)
             {

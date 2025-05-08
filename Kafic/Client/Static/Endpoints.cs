@@ -16,5 +16,6 @@
         public static string DeleteUserEndpoint = $"{BaseUrl}api/users/deleteUser/";
         public static string GetUserByIdEndpoint = $"{BaseUrl}api/users/getUser/";
         public static string UpdateUserEndpoint = $"{BaseUrl}api/users/updateUser/";
+        public static string UpdateUserPasswordEndpoint = $"{BaseUrl}api/users/updateUserPassword/";
     }
 }

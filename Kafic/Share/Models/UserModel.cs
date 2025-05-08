@@ -79,4 +79,14 @@ namespace Share.Models
 
         public string AdminEmail { get; set; } = string.Empty;
     }
+
+    public class RegistrationUserModelEditPassword
+    {
+        public Guid Id { get; set; }
+
+        [Required(ErrorMessage = "Obavezno polje")]
+        [DataType(DataType.Password)]
+        [StringLength(15, ErrorMessage = "Sifra mora imati najmanje 3 karaktera, a maksimalno 15 karaktera", MinimumLength = 3)]
+        public string Password { get; set; } = string.Empty;
+    }
 }

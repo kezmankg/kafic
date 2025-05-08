@@ -14,5 +14,6 @@ namespace Client.Contracts
         public Task<bool> DeleteUser(Guid id);
         public Task<RegistrationUserModelEdit> GetUserPerId(string id);
         public Task<bool> UpdateUser(RegistrationUserModelEdit model);
+        public Task<bool> UpdateUserPassword(RegistrationUserModelEditPassword model);
     }
 }

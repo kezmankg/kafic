@@ -42,6 +42,18 @@
         </EditForm>
         <br /><br />
         Update Password
+        <EditForm Model="ModelEditPass" OnValidSubmit="HandleSettingsUserPass" Context="EditForm2">
+            <DataAnnotationsValidator />
+            <div class="form-group">
+                <label for="lastname">Nova sifra</label>
+                <InputText @bind-Value="ModelEditPass.Password" type="password" class="form-control" id="PhoneNumber" />
+                <ValidationMessage For="@(() => ModelEditPass.Password)" />
+            </div>
+            <button class="btn btn-primary" type="submit">
+                <span class="oi oi-pencil"></span>
+                Create Author
+            </button>
+        </EditForm>
 
     </Authorized>
     <NotAuthorized>
@@ -52,6 +64,7 @@
 
 @code {
     private RegistrationUserModelEdit Model = new RegistrationUserModelEdit();
+    private RegistrationUserModelEditPassword ModelEditPass = new RegistrationUserModelEditPassword();
     private bool isSuccess = true;
     private string? message;
 
@@ -69,12 +82,28 @@
         if (user.Identity.IsAuthenticated)
         {
             Model = await _repo.GetUserPerId(Id);
+            ModelEditPass.Id = Model.Id;
         }
     }
     private async Task HandleSettingsUser()
     {
-        message = "Test";
         var response = await _repo.UpdateUser(Model);
+
+        if (response)
+        {
+            // Uspešno promenjeno
+            _navManager.NavigateTo($"/Users/");
+        }
+        else
+        {
+            // Prikaz poruke o grešci
+            message = "error";
+        }
+    }
+
+    private async Task HandleSettingsUserPass()
+    {
+        var response = await _repo.UpdateUserPassword(ModelEditPass);
 
         if (response)
         {

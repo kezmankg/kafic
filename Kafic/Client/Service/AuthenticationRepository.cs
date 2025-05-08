@@ -151,6 +151,14 @@ namespace Client.Service
             return response.IsSuccessStatusCode;
         }
 
+        public async Task<bool> UpdateUserPassword(RegistrationUserModelEditPassword model)
+        {
+            _client.DefaultRequestHeaders.Authorization =
+               new AuthenticationHeaderValue("bearer", await GetBearerToken());
+            var response = await _client.PutAsJsonAsync(Endpoints.UpdateUserPasswordEndpoint, model);
+            return response.IsSuccessStatusCode;
+        }
+
         private async Task<string> GetBearerToken()
         {
             return await _localStorage.GetItemAsync<string>("authToken");
