@@ -119,6 +119,21 @@ namespace Client.Service
             return reponse;
         }
 
+        public async Task<bool> DeleteUser(Guid id)
+        {
+            _client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("bearer", await GetBearerToken());
+            var response = await _client.DeleteAsync(Endpoints.DeleteUserEndpoint + id.ToString());
+
+            if (response.StatusCode == HttpStatusCode.NoContent)
+            {
+                return true;
+            }
+                
+            return false;
+
+        }
+
         private async Task<string> GetBearerToken()
         {
             return await _localStorage.GetItemAsync<string>("authToken");

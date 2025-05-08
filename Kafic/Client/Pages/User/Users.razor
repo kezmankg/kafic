@@ -71,6 +71,14 @@
                         <td>@user.FullName</td>
                         <td>@user.Email</td>
                         <td>@user.PhoneNumber</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm" @onclick="@(() => EditUser(user.Id))">Izmeni</button>
+                            @if (!user.Email.ToLower().Equals(userEmail.ToLower()))
+                            {
+                                <button class="btn btn-danger btn-sm" @onclick="@(() => DeleteUser(user.Id))">Obriši</button>
+                            }                           
+                            
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -84,6 +92,7 @@
     private RegistrationUserModel Model = new RegistrationUserModel();
     private bool isSuccess = true;
     private string? errorMessage;
+    private string userEmail = string.Empty;
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
 
@@ -96,7 +105,7 @@
 
         if (user.Identity.IsAuthenticated)
         {
-            var userName = user.Identity.Name;
+            userEmail = user.Identity.Name;
             AllUsers = await _repo.GetAllUsers(user.Identity.Name);
         }
     }
@@ -119,6 +128,26 @@
         else
         {
             errorMessage = error;
+        }
+    }
+
+    private void EditUser(Guid id)
+    {
+        _navManager.NavigateTo($"/edit-user/{id}");
+    }
+
+    private async Task DeleteUser(Guid id)
+    {
+        var error = await _repo.DeleteUser(id);
+        if (error)
+        {
+            errorMessage = "";
+            AllUsers = await _repo.GetAllUsers(userEmail);
+
+        }
+        else
+        {
+            errorMessage = "Greska pri brisanju";
         }
     }
 }

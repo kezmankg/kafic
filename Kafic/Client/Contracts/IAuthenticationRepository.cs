@@ -11,5 +11,6 @@ namespace Client.Contracts
         public Task<bool> UpdateCompany(CompanyModel companyModel);
         public Task<string?> RegisterUser(RegistrationUserModel user);
         public Task<IList<RegistrationUserModel>> GetAllUsers(string email);
+        public Task<bool> DeleteUser(Guid id);
     }
 }
