@@ -63,4 +63,20 @@ namespace Share.Models
 
         public string AdminEmail { get; set; } = string.Empty;
     }
+
+    public class RegistrationUserModelEdit
+    {
+        public Guid Id { get; set; }
+        [Required(ErrorMessage = "Obavezno polje")]
+        [EmailAddress(ErrorMessage = "Email nije validan")]
+        [Display(Name = "Email")]
+        public string Email { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Obavezno polje")]
+        [Display(Name = "Ime i prezime")]
+        public string FullName { get; set; } = string.Empty;
+        [Display(Name = "Telefon")]
+        public string PhoneNumber { get; set; } = string.Empty;
+
+        public string AdminEmail { get; set; } = string.Empty;
+    }
 }

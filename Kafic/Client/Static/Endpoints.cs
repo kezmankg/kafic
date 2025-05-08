@@ -14,5 +14,7 @@
         public static string RegisterUserEndpoint = $"{BaseUrl}api/users/registerUser/";
         public static string GetAllUsersEndpoint = $"{BaseUrl}api/users/getAllUsers/";
         public static string DeleteUserEndpoint = $"{BaseUrl}api/users/deleteUser/";
+        public static string GetUserByIdEndpoint = $"{BaseUrl}api/users/getUser/";
+        public static string UpdateUserEndpoint = $"{BaseUrl}api/users/updateUser/";
     }
 }

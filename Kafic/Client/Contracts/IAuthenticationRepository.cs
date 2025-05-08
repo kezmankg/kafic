@@ -12,5 +12,7 @@ namespace Client.Contracts
         public Task<string?> RegisterUser(RegistrationUserModel user);
         public Task<IList<RegistrationUserModel>> GetAllUsers(string email);
         public Task<bool> DeleteUser(Guid id);
+        public Task<RegistrationUserModelEdit> GetUserPerId(string id);
+        public Task<bool> UpdateUser(RegistrationUserModelEdit model);
     }
 }

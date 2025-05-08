@@ -347,6 +347,73 @@ namespace Server.Controllers
             
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpGet("getUser/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetUserById(string id)
+        {
+            var location = GetControllerActionNames();
+            try
+            {
+                var user = await _userManager.FindByIdAsync(id);
+                
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                var response = _mapper.Map<RegistrationUserModelEdit>(user);
+
+                return Ok(response);
+            }
+            catch (Exception e)
+            {
+                return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
+            }
+
+        }
+
+        [Route("updateUser")]
+        [HttpPut]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UpdateUser(RegistrationUserModelEdit model)
+        {
+            var location = GetControllerActionNames();
+            try
+            {
+                var user = await _userManager.FindByIdAsync(model.Id.ToString());
+
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                user.FullName = model.FullName;
+                user.PhoneNumber = model.PhoneNumber;
+
+                _db.Users.Update(user);
+
+                var changes = await _db.SaveChangesAsync();
+
+                if (changes > 0)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                        "update caffe-a");
+                }
+            }
+            catch (Exception e)
+            {
+                return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
+            }
+        }
+
         private async Task<string> GenerateJSONWebToken(ApplicationUser user)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));

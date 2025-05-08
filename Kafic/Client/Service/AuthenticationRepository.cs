@@ -134,6 +134,23 @@ namespace Client.Service
 
         }
 
+        public async Task<RegistrationUserModelEdit> GetUserPerId(string id)
+        {
+            _client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("bearer", await GetBearerToken());
+
+            var reponse = await _client.GetFromJsonAsync<RegistrationUserModelEdit>(Endpoints.GetUserByIdEndpoint + id);
+            return reponse;
+        }
+
+        public async Task<bool> UpdateUser(RegistrationUserModelEdit model)
+        {
+            _client.DefaultRequestHeaders.Authorization =
+               new AuthenticationHeaderValue("bearer", await GetBearerToken());
+            var response = await _client.PutAsJsonAsync(Endpoints.UpdateUserEndpoint, model);
+            return response.IsSuccessStatusCode;
+        }
+
         private async Task<string> GetBearerToken()
         {
             return await _localStorage.GetItemAsync<string>("authToken");
