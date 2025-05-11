@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -90,5 +91,70 @@ namespace Server.Controllers
 
         }
 
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpGet("getGroup/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetGroupById(string id)
+        {
+            var location = GetControllerActionNames();
+            try
+            {
+                var group = await _db.Groups.FirstOrDefaultAsync(q => q.Id == int.Parse(id));
+
+                if (group == null)
+                {
+                    return NotFound();
+                }
+
+                var response = _mapper.Map<GroupModel>(group);
+
+                return Ok(response);
+            }
+            catch (Exception e)
+            {
+                return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
+            }
+
+        }
+
+        [Route("updateGroup")]
+        [HttpPut]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UpdateGroup(GroupModel model)
+        {
+            var location = GetControllerActionNames();
+            try
+            {
+                var group = await _db.Groups.FirstOrDefaultAsync(q => q.Id == model.Id);
+                if (group == null)
+                {
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                        "grupa ne postoji");
+                }
+
+                group.Name = model.Name;
+               
+                _db.Groups.Update(group);
+
+                var changes = await _db.SaveChangesAsync();
+
+                if (changes > 0)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                        "update group-a");
+                }
+            }
+            catch (Exception e)
+            {
+                return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
+            }
+        }
     }
 }

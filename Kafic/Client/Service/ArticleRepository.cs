@@ -41,6 +41,22 @@ namespace Client.Service
             return reponse;
         }
 
+        public async Task<GroupModel> GetGroupById(string id)
+        {
+            _client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("bearer", await GetBearerToken());
+
+            var reponse = await _client.GetFromJsonAsync<GroupModel>(Endpoints.GetGroupByIdEndpoint + id);
+            return reponse;
+        }
+
+        public async Task<bool> UpdateGroup(GroupModel model)
+        {
+            _client.DefaultRequestHeaders.Authorization =
+               new AuthenticationHeaderValue("bearer", await GetBearerToken());
+            var response = await _client.PutAsJsonAsync(Endpoints.UpdateGroupEndpoint, model);
+            return response.IsSuccessStatusCode;
+        }
         private async Task<string> GetBearerToken()
         {
             return await _localStorage.GetItemAsync<string>("authToken");

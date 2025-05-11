@@ -1,0 +1,85 @@
+﻿@page "/editgroup/{Id}"
+@using Blazored.Toast.Services
+@using Client.Contracts
+@using Client.Static
+@using Share.Models
+
+<h3>Settings</h3>
+
+
+@inject IArticleRepository _repo
+@inject NavigationManager _navManager
+@inject IToastService _toastService
+
+
+<AuthorizeView Roles="Administrator">
+    <Authorized>
+        Update User Info
+        <hr />
+        <br />
+        @if (!string.IsNullOrWhiteSpace(message))
+        {
+            @message
+        }
+
+        <EditForm Model="Model" OnValidSubmit="HandleUserGroup" Context="EditForm1">
+            <DataAnnotationsValidator />
+            <div class="form-group">
+                <label for="lastname">Ime grupe</label>
+                <InputText @bind-Value="Model.Name" class="form-control" id="Name" />
+                <ValidationMessage For="@(() => Model.Name)" />
+            </div>
+
+            <button class="btn btn-primary" type="submit">
+                <span class="oi oi-pencil"></span>
+                Create Author
+            </button>
+        </EditForm>
+        <br /><br />
+
+
+    </Authorized>
+    <NotAuthorized>
+        <p>Nemate pristup ovoj stranici.</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+
+@code {
+    private GroupModel Model = new GroupModel();
+    private bool isSuccess = true;
+    private string? message;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    [Parameter]
+    public String Id { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            Model = await _repo.GetGroupById(Id);
+        }
+    }
+    private async Task HandleUserGroup()
+    {
+        var response = await _repo.UpdateGroup(Model);
+
+        if (response)
+        {
+            // Uspešno promenjeno
+            _navManager.NavigateTo($"/Group/");
+        }
+        else
+        {
+            // Prikaz poruke o grešci
+            message = "error";
+        }
+    }
+
+}

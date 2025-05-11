@@ -20,5 +20,7 @@
 
         public static string AddGroupEndpoint = $"{BaseUrl}api/article/addGroup/";
         public static string GetAllGroupsEndpoint = $"{BaseUrl}api/article/getAllGroups/";
+        public static string GetGroupByIdEndpoint = $"{BaseUrl}api/article/getGroup/";
+        public static string UpdateGroupEndpoint = $"{BaseUrl}api/article/updateGroup/";
     }
 }
