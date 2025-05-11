@@ -30,5 +30,8 @@
         public static string GetAllArticlesEndpoint = $"{BaseUrl}api/article/getAllArticles/";
         public static string GetArticleByIdEndpoint = $"{BaseUrl}api/article/getArticle/";
         public static string UpdateArticleEndpoint = $"{BaseUrl}api/article/updateArticle/";
+        public static string DeleteArticleEndpoint = $"{BaseUrl}api/article/deleteArticle/";
+        public static string DeleteSubgroupEndpoint = $"{BaseUrl}api/article/deleteSubgroup/";
+        public static string DeleteGroupEndpoint = $"{BaseUrl}api/article/deleteGroup/";
     }
 }

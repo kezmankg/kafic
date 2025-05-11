@@ -122,6 +122,52 @@ namespace Client.Service
             var response = await _client.PutAsJsonAsync(Endpoints.UpdateArticleEndpoint, model);
             return response.IsSuccessStatusCode;
         }
+
+        public async Task<bool> DeleteGroup(int id)
+        {
+            if (id < 1)
+                return false;
+
+            _client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("bearer", await GetBearerToken());
+            var response = await _client.DeleteAsync(Endpoints.DeleteGroupEndpoint + id);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+                return true;
+
+            return false;
+        }
+
+        public async Task<bool> DeleteSubGroup(int id)
+        {
+            if (id < 1)
+                return false;
+
+            _client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("bearer", await GetBearerToken());
+            var response = await _client.DeleteAsync(Endpoints.DeleteSubgroupEndpoint + id);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+                return true;
+
+            return false;
+        }
+
+        public async Task<bool> DeleteArticle(int id)
+        {
+            if (id < 1)
+                return false;
+
+            _client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("bearer", await GetBearerToken());
+            var response = await _client.DeleteAsync(Endpoints.DeleteArticleEndpoint + id);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+                return true;
+
+            return false;
+        }
+
         private async Task<string> GetBearerToken()
         {
             return await _localStorage.GetItemAsync<string>("authToken");

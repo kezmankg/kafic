@@ -407,5 +407,131 @@ namespace Server.Controllers
                 return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
             }
         }
+
+        [HttpDelete("deleteArticle/{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeleteArticles(int id)
+        {
+            var location = GetControllerActionNames();
+            try
+            {
+                if (id < 1)
+                {
+                    return BadRequest();
+                }
+
+                var model = await _db.Articles.FirstOrDefaultAsync(q => q.Id == id);
+                if(model == null)
+                {
+                    return NotFound();
+                }
+                _db.Articles.Remove(model);
+
+                var changes = await _db.SaveChangesAsync();
+                if (changes > 0)
+                {
+                    return NoContent();
+                }
+                else
+                {
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                        "delete artikla");
+                }
+
+            }
+            catch (Exception e)
+            {
+                return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
+            }
+
+        }
+
+        [HttpDelete("deleteSubgroup/{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeleteSubgroup(int id)
+        {
+            var location = GetControllerActionNames();
+            try
+            {
+                if (id < 1)
+                {
+                    return BadRequest();
+                }
+
+                var model = await _db.Subgroups.Include(g => g.Articles).FirstOrDefaultAsync(q => q.Id == id);
+                if (model == null)
+                {
+                    return NotFound();
+                }
+                _db.Subgroups.Remove(model);
+
+                var changes = await _db.SaveChangesAsync();
+                if (changes > 0)
+                {
+                    return NoContent();
+                }
+                else
+                {
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                        "delete podgrupa");
+                }
+
+            }
+            catch (Exception e)
+            {
+                return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
+            }
+
+        }
+
+        [HttpDelete("deleteGroup/{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeleteGroup(int id)
+        {
+            var location = GetControllerActionNames();
+            try
+            {
+                if (id < 1)
+                {
+                    return BadRequest();
+                }
+
+                var model = await _db.Groups
+                    .Include(g => g.Subgroups)
+                        .ThenInclude(sg => sg.Articles)
+                    .FirstOrDefaultAsync(g => g.Id == id);
+                if (model == null)
+                {
+                    return NotFound();
+                }
+                _db.Groups.Remove(model);
+
+                var changes = await _db.SaveChangesAsync();
+                if (changes > 0)
+                {
+                    return NoContent();
+                }
+                else
+                {
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                        "delete podgrupa");
+                }
+
+            }
+            catch (Exception e)
+            {
+                return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
+            }
+
+        }
     }
 }

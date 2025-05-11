@@ -152,16 +152,16 @@
 
     private async Task Delete(int id)
     {
-        // var error = await _repo.DeleteUser(id);
-        // if (error)
-        // {
-        //     errorMessage = "";
-        //     AllSubGroups = await _repoArticle.GetAllGroup(userEmail);
+        var result = await _repoArticle.DeleteArticle(id);
+        if (result)
+        {
+            errorMessage = "";
+            AllArticles = await _repoArticle.GetAllArticles(userEmail);
 
-        // }
-        // else
-        // {
-        //     errorMessage = "Greska pri brisanju";
-        // }
+        }
+        else
+        {
+            errorMessage = "Greska pri brisanju";
+        }
     }
 }

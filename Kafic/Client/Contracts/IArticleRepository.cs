@@ -16,5 +16,9 @@ namespace Client.Contracts
         public Task<IList<GroupModel>> GetAllArticles(string email);
         public Task<ArticleModel> GetArticleById(string id);
         public Task<bool> UpdateArtile(ArticleModel model);
+
+        public Task<bool> DeleteGroup(int id);
+        public Task<bool> DeleteSubGroup(int id);
+        public Task<bool> DeleteArticle(int id);
     }
 }

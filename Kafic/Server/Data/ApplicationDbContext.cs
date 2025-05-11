@@ -18,6 +18,19 @@ namespace Server.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Group>()
+                .HasMany(g => g.Subgroups)
+                .WithOne(sg => sg.Group)
+                .HasForeignKey(sg => sg.GroupId)
+                .OnDelete(DeleteBehavior.Cascade); // kaskadno brisanje za podgrupe
+
+            modelBuilder.Entity<Subgroup>()
+                .HasMany(sg => sg.Articles)
+                .WithOne(a => a.Subgroup)
+                .HasForeignKey(a => a.SubgroupId)
+                .OnDelete(DeleteBehavior.Cascade); // kaskadno brisanje za artikle
+            
         }
     }
 }
