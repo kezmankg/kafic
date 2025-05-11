@@ -7,15 +7,17 @@ using System.Threading.Tasks;
 
 namespace Share.Models
 {
-    public class SubgroupModel
+    public class ArticleModel
     {
         public int Id { get; set; }
         [Required(ErrorMessage = "Obavezno polje")]
         [Display(Name = "Naziv podgrupe")]
         public string Name { get; set; } = string.Empty;
+        [Required]
+        [Range(0, int.MaxValue, ErrorMessage = "Cena ne sme biti negativan broj")]
+        public double Price { get; set; }        
         [Required(ErrorMessage = "Obavezno polje")]
-        [Range(1, int.MaxValue, ErrorMessage = "Morate izabrati grupu")]
-        public int? GroupId { get; set; }
-        public virtual IList<ArticleModel> Articles { get; set; } = new List<ArticleModel>();
+        [Range(1, int.MaxValue, ErrorMessage = "Morate izabrati podgrupu")]
+        public int? SubgroupId { get; set; }
     }
 }

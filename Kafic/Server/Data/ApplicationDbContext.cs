@@ -9,6 +9,7 @@ namespace Server.Data
         public DbSet<Caffe> Caffes { get; set; }
         public DbSet<Group> Groups { get; set; }
         public DbSet<Subgroup> Subgroups { get; set; }
+        public DbSet<Article> Articles { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)

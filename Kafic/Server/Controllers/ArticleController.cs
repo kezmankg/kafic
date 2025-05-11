@@ -278,5 +278,66 @@ namespace Server.Controllers
                 return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
             }
         }
+
+        [Route("addArticle")]
+        [HttpPost]
+        public async Task<IActionResult> AddArticle([FromBody] ArticleModel model)
+        {
+            var location = GetControllerActionNames();
+            try
+            {
+                var article = _mapper.Map<Article>(model);
+
+                _db.Articles.Add(article);
+
+                var changes = await _db.SaveChangesAsync();
+
+                if (changes > 0)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                        "Create article");
+                }
+            }
+            catch (Exception e)
+            {
+                return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
+            }
+
+        }
+
+        [HttpGet("getAllArticles/{email}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetAllArticles(string email)
+        {
+            var location = GetControllerActionNames();
+            try
+            {
+                var userAdmin = await _userManager.FindByEmailAsync(email);
+                if (userAdmin == null)
+                {
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                        "user ne postoji");
+                }
+
+                var groups = await _db.Groups
+                    .Where(g => g.CaffeId == userAdmin.CaffeId &&
+                                g.Subgroups.Any(sg => sg.Articles.Any()))
+                    .Include(g => g.Subgroups.Where(sg => sg.Articles.Any()))
+                        .ThenInclude(sg => sg.Articles)
+                    .ToListAsync();
+                var response = _mapper.Map<IList<GroupModel>>(groups);
+                return Ok(response);
+            }
+            catch (Exception e)
+            {
+                return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
+            }
+
+        }
     }
 }

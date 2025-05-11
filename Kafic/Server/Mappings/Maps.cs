@@ -13,6 +13,7 @@ namespace Server.Mappings
             CreateMap<ApplicationUser, RegistrationUserModelEdit>().ReverseMap();
             CreateMap<Group, GroupModel>().ReverseMap();
             CreateMap<Subgroup, SubgroupModel>().ReverseMap();
+            CreateMap<Article, ArticleModel>().ReverseMap();
         }
     }
 }

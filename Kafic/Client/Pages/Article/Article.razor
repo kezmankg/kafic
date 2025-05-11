@@ -1,0 +1,167 @@
+﻿@page "/Article"
+@using Blazored.Toast.Services
+@using Client.Contracts
+@using Client.Static
+@using Share.Models
+
+<h3>Users</h3>
+
+
+@inject IAuthenticationRepository _repo
+@inject IArticleRepository _repoArticle
+@inject NavigationManager _navManager
+@inject IToastService _toastService
+
+
+
+<AuthorizeView Roles="Administrator">
+    <Authorized>
+
+        Create New User
+        <hr />
+        <br />
+        @if (!string.IsNullOrWhiteSpace(errorMessage))
+        {
+            @errorMessage
+        }
+
+
+        <EditForm Model="Model" OnValidSubmit="HandleRegistration" Context="EditForm">
+            <DataAnnotationsValidator />
+            @* <ValidationSummary /> *@
+            <div class="form-group">
+                <label for="group">Group</label>
+                <InputSelect @bind-Value="Model.SubgroupId" class="form-control" id="group">
+                    <option value="0">-- Izaberite podgrupu --</option>
+                    @foreach (var group in AllGroupsWithSubgroups)
+                    {
+                        <optgroup label="@group.Name">
+                            @foreach (var subgroup in group.Subgroups)
+                            {
+                                <option value="@subgroup.Id">@subgroup.Name</option>
+                            }
+                        </optgroup>
+                        
+                    }
+                </InputSelect>
+                <ValidationMessage For="@(() => Model.SubgroupId)" />
+            </div>
+            <div class="form-group">
+                <label for="firstname">Name</label>
+                <InputText @bind-Value="Model.Name" class="form-control" id="emailaddress" />
+                <ValidationMessage For="@(() => Model.Name)" />
+            </div>
+
+             <div class="form-group">
+                <label for="Price">Cena</label>
+                <InputNumber @bind-Value="Model.Price" class="form-control" id="Price" />
+                <ValidationMessage For="@(() => Model.Price)" />
+            </div>
+
+            <button class="btn btn-primary" type="submit">
+                <span class="oi oi-pencil"></span>
+                Create Author
+            </button>
+        </EditForm>
+        <br />
+
+        
+        @foreach (var group in AllArticles)
+        {
+            <h4>@group.Name</h4>
+
+            @foreach (var subgroup in group.Subgroups)
+            {
+                <h5 class="ms-3">@subgroup.Name</h5>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Ime</th>
+                            <th>Cena</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var article in subgroup.Articles)
+                        {
+                            <tr>
+                                <td>@article.Name</td>
+                                <td>@article.Price</td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm" @onclick="@(() => Edit(article.Id))">Izmeni</button>
+                                    <button class="btn btn-danger btn-sm" @onclick="@(() => Delete(article.Id))">Obriši</button>
+
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+            }
+        }
+    </Authorized>
+    <NotAuthorized>
+        <p>Nemate pristup ovoj stranici.</p>
+    </NotAuthorized>
+</AuthorizeView>
+@code {
+    private ArticleModel Model = new ArticleModel();
+    private bool isSuccess = true;
+    private string? errorMessage;
+    private string userEmail = string.Empty;
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    private IList<GroupModel> AllGroupsWithSubgroups = new List<GroupModel>();
+    private IList<GroupModel> AllArticles = new List<GroupModel>();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            userEmail = user.Identity.Name;
+            AllGroupsWithSubgroups = await _repoArticle.GetAllGroupWithSubgroup(user.Identity.Name);
+            AllArticles = await _repoArticle.GetAllArticles(user.Identity.Name);
+        }
+    }
+
+    private async Task HandleRegistration()
+    {
+
+        var result = await _repoArticle.AddArticle(Model);
+        if (result)
+        {
+            Model = new ArticleModel();
+            errorMessage = "";
+            AllArticles = await _repoArticle.GetAllArticles(userEmail);
+
+        }
+        else
+        {
+            errorMessage = "Greska kod dodavanja grupe";
+        }
+    }
+
+    private void Edit(int id)
+    {
+        _navManager.NavigateTo($"/EditArticle/{id}");
+    }
+
+    private async Task Delete(int id)
+    {
+        // var error = await _repo.DeleteUser(id);
+        // if (error)
+        // {
+        //     errorMessage = "";
+        //     AllSubGroups = await _repoArticle.GetAllGroup(userEmail);
+
+        // }
+        // else
+        // {
+        //     errorMessage = "Greska pri brisanju";
+        // }
+    }
+}

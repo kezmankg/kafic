@@ -89,6 +89,23 @@ namespace Client.Service
             var response = await _client.PutAsJsonAsync(Endpoints.UpdateSubGroupEndpoint, model);
             return response.IsSuccessStatusCode;
         }
+
+        public async Task<bool> AddArticle(ArticleModel group)
+        {
+            _client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("bearer", await GetBearerToken());
+            var response = await _client.PostAsJsonAsync(Endpoints.AddArticleEndpoint, group);
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<IList<GroupModel>> GetAllArticles(string email)
+        {
+            _client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("bearer", await GetBearerToken());
+
+            var reponse = await _client.GetFromJsonAsync<IList<GroupModel>>(Endpoints.GetAllArticlesEndpoint + email);
+            return reponse;
+        }
         private async Task<string> GetBearerToken()
         {
             return await _localStorage.GetItemAsync<string>("authToken");

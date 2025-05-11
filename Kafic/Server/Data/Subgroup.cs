@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Share.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace Server.Data
 {
@@ -9,5 +10,6 @@ namespace Server.Data
         public string Name { get; set; } = string.Empty;
         public int? GroupId { get; set; }
         public virtual Group? Group { get; set; }
+        public virtual IList<Article> Articles { get; set; } = new List<Article>();
     }
 }

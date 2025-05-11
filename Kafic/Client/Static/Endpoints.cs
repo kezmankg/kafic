@@ -26,5 +26,7 @@
         public static string GetGroupByIdWithSubgroupEndpoint = $"{BaseUrl}api/article/getGroupWithSubgroup/";
         public static string GetSubGroupByIdEndpoint = $"{BaseUrl}api/article/getSubGroup/";
         public static string UpdateSubGroupEndpoint = $"{BaseUrl}api/article/updateSubGroup/";
+        public static string AddArticleEndpoint = $"{BaseUrl}api/article/addArticle/";
+        public static string GetAllArticlesEndpoint = $"{BaseUrl}api/article/getAllArticles/";
     }
 }

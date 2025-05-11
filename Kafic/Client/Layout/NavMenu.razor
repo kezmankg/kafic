@@ -44,6 +44,13 @@
             </AuthorizeView>
         </div>
         <div class="nav-item px-3">
+            <AuthorizeView Roles="Administrator">
+                <NavLink class="nav-link" href="article">
+                    Artikli
+                </NavLink>
+            </AuthorizeView>
+        </div>
+        <div class="nav-item px-3">
             <AuthorizeView>
                 <Authorized>
                     <NavLink class="nav-link" href="logout">
