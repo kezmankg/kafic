@@ -1,0 +1,154 @@
+﻿@page "/SubGroup"
+@using Blazored.Toast.Services
+@using Client.Contracts
+@using Client.Static
+@using Share.Models
+
+<h3>Users</h3>
+
+
+@inject IAuthenticationRepository _repo
+@inject IArticleRepository _repoArticle
+@inject NavigationManager _navManager
+@inject IToastService _toastService
+
+
+
+<AuthorizeView Roles="Administrator">
+    <Authorized>
+
+        Create New User
+        <hr />
+        <br />
+        @if (!string.IsNullOrWhiteSpace(errorMessage))
+        {
+            @errorMessage
+        }
+
+
+        <EditForm Model="Model" OnValidSubmit="HandleRegistration" Context="EditForm">
+            <DataAnnotationsValidator />
+            @* <ValidationSummary /> *@
+            <div class="form-group">
+                <label for="group">Group</label>
+                <InputSelect @bind-Value="Model.GroupId" class="form-control" id="group">
+                    <option value="0">-- Izaberite grupu --</option>
+                    @foreach (var group in AllGroups)
+                    {
+                        <option value="@group.Id">@group.Name</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="@(() => Model.GroupId)" />
+            </div>
+            <div class="form-group">
+                <label for="firstname">Name</label>
+                <InputText @bind-Value="Model.Name" class="form-control" id="emailaddress" />
+                <ValidationMessage For="@(() => Model.Name)" />
+            </div>
+
+            <button class="btn btn-primary" type="submit">
+                <span class="oi oi-pencil"></span>
+                Create Author
+            </button>
+        </EditForm>
+        <br />
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Grupa</th>
+                    <th>Podgrupa</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var group in AllGroupsWithSubgroups)
+                {
+                    @* <tr>
+                        <td>@group.Name</td>
+                        <td>
+                            <button class="btn btn-primary btn-sm" @onclick="@(() => Edit(group.Id))">Izmeni</button>
+                            <button class="btn btn-danger btn-sm" @onclick="@(() => Delete(group.Id))">Obriši</button>
+
+                        </td>
+                    </tr> *@
+                    @foreach (var subgroup in group.Subgroups)
+                    {
+                        <tr>
+                            <td>@group.Name</td>
+                            <td>@subgroup.Name</td>
+                            <td>
+                                <button class="btn btn-primary btn-sm" @onclick="@(() => Edit(subgroup.Id))">Izmeni</button>
+                                <button class="btn btn-danger btn-sm" @onclick="@(() => Delete(subgroup.Id))">Obriši</button>
+
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </Authorized>
+    <NotAuthorized>
+        <p>Nemate pristup ovoj stranici.</p>
+    </NotAuthorized>
+</AuthorizeView>
+@code {
+    private SubgroupModel Model = new SubgroupModel();
+    private bool isSuccess = true;
+    private string? errorMessage;
+    private string userEmail = string.Empty;
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    private IList<GroupModel> AllGroups = new List<GroupModel>();
+    private IList<GroupModel> AllGroupsWithSubgroups = new List<GroupModel>();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            userEmail = user.Identity.Name;
+            AllGroups = await _repoArticle.GetAllGroup(user.Identity.Name);
+            AllGroupsWithSubgroups = await _repoArticle.GetAllGroupWithSubgroup(user.Identity.Name);
+        }
+    }
+
+    private async Task HandleRegistration()
+    {
+
+        var result = await _repoArticle.AddSubGroup(Model);
+        if (result)
+        {
+            Model = new SubgroupModel();
+            errorMessage = "";
+            AllGroupsWithSubgroups = await _repoArticle.GetAllGroupWithSubgroup(userEmail);
+
+        }
+        else
+        {
+            errorMessage = "Greska kod dodavanja grupe";
+        }
+    }
+
+    private void Edit(int id)
+    {
+        _navManager.NavigateTo($"/EditSubGroup/{id}");
+    }
+
+    private async Task Delete(int id)
+    {
+        // var error = await _repo.DeleteUser(id);
+        // if (error)
+        // {
+        //     errorMessage = "";
+        //     AllSubGroups = await _repoArticle.GetAllGroup(userEmail);
+
+        // }
+        // else
+        // {
+        //     errorMessage = "Greska pri brisanju";
+        // }
+    }
+}

@@ -156,5 +156,127 @@ namespace Server.Controllers
                 return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
             }
         }
+        [Route("addSubGroup")]
+        [HttpPost]
+        public async Task<IActionResult> AddSubGroup([FromBody] SubgroupModel model)
+        {
+            var location = GetControllerActionNames();
+            try
+            {
+                var group = _mapper.Map<Subgroup>(model);
+
+                _db.Subgroups.Add(group);
+
+                var changes = await _db.SaveChangesAsync();
+
+                if (changes > 0)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                        "Create subgroup");
+                }
+            }
+            catch (Exception e)
+            {
+                return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
+            }
+
+        }
+
+        [HttpGet("getGroupWithSubgroup/{email}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetAllGroupByIdWithSubgroup(string email)
+        {
+            var location = GetControllerActionNames();
+            try
+            {
+                var userAdmin = await _userManager.FindByEmailAsync(email);
+                if (userAdmin == null)
+                {
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                        "user ne postoji");
+                }
+
+                var groups = await _db.Groups.Where(q => q.CaffeId == userAdmin.CaffeId).Include(g => g.Subgroups).ToListAsync();
+
+                var response = _mapper.Map<IList<GroupModel>>(groups);
+                return Ok(response);
+            }
+            catch (Exception e)
+            {
+                return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
+            }
+
+        }
+
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpGet("getSubGroup/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetSubGroupById(string id)
+        {
+            var location = GetControllerActionNames();
+            try
+            {
+                var group = await _db.Subgroups.FirstOrDefaultAsync(q => q.Id == int.Parse(id));
+
+                if (group == null)
+                {
+                    return NotFound();
+                }
+
+                var response = _mapper.Map<SubgroupModel>(group);
+
+                return Ok(response);
+            }
+            catch (Exception e)
+            {
+                return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
+            }
+
+        }
+        [Route("updateSubGroup")]
+        [HttpPut]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UpdateSubGroup(SubgroupModel model)
+        {
+            var location = GetControllerActionNames();
+            try
+            {
+                var group = await _db.Subgroups.FirstOrDefaultAsync(q => q.Id == model.Id);
+                if (group == null)
+                {
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                        "sub grupa ne postoji");
+                }
+
+                group.GroupId = model.GroupId;
+                group.Name = model.Name;
+
+                _db.Subgroups.Update(group);
+
+                var changes = await _db.SaveChangesAsync();
+
+                if (changes > 0)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                        "update group-a");
+                }
+            }
+            catch (Exception e)
+            {
+                return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
+            }
+        }
     }
 }

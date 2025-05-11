@@ -9,5 +9,6 @@ namespace Server.Data
         public string Name { get; set; } = string.Empty;
         public int? CaffeId { get; set; }
         public virtual Caffe? Caffe { get; set; }
+        public virtual IList<Subgroup> Subgroups { get; set; } = new List<Subgroup>();
     }
 }

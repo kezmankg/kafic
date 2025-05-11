@@ -57,6 +57,38 @@ namespace Client.Service
             var response = await _client.PutAsJsonAsync(Endpoints.UpdateGroupEndpoint, model);
             return response.IsSuccessStatusCode;
         }
+        public async Task<bool> AddSubGroup(SubgroupModel group)
+        {
+            _client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("bearer", await GetBearerToken());
+            var response = await _client.PostAsJsonAsync(Endpoints.AddSubGroupEndpoint, group);
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<IList<GroupModel>> GetAllGroupWithSubgroup(string email)
+        {
+            _client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("bearer", await GetBearerToken());
+
+            var reponse = await _client.GetFromJsonAsync<IList<GroupModel>>(Endpoints.GetGroupByIdWithSubgroupEndpoint + email);
+            return reponse;
+        }
+
+        public async Task<SubgroupModel> GetSubGroupById(string id)
+        {
+            _client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("bearer", await GetBearerToken());
+
+            var reponse = await _client.GetFromJsonAsync<SubgroupModel>(Endpoints.GetSubGroupByIdEndpoint + id);
+            return reponse;
+        }
+        public async Task<bool> SubUpdateGroup(SubgroupModel model)
+        {
+            _client.DefaultRequestHeaders.Authorization =
+               new AuthenticationHeaderValue("bearer", await GetBearerToken());
+            var response = await _client.PutAsJsonAsync(Endpoints.UpdateSubGroupEndpoint, model);
+            return response.IsSuccessStatusCode;
+        }
         private async Task<string> GetBearerToken()
         {
             return await _localStorage.GetItemAsync<string>("authToken");

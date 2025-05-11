@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 
 namespace Share.Models
 {
-    public class GroupModel
+    public class SubgroupModel
     {
         public int Id { get; set; }
         [Required(ErrorMessage = "Obavezno polje")]
-        [Display(Name = "Naziv grupe")]
+        [Display(Name = "Naziv podgrupe")]
         public string Name { get; set; } = string.Empty;
-        public int? CaffeId { get; set; }
-        public string AdminEmail { get; set; } = string.Empty;
-        public virtual IList<SubgroupModel> Subgroups { get; set; } = new List<SubgroupModel>();
+        [Required(ErrorMessage = "Obavezno polje")]
+        [Range(1, int.MaxValue, ErrorMessage = "Morate izabrati grupu")]
+        public int? GroupId { get; set; }
     }
 }
