@@ -28,5 +28,7 @@
         public static string UpdateSubGroupEndpoint = $"{BaseUrl}api/article/updateSubGroup/";
         public static string AddArticleEndpoint = $"{BaseUrl}api/article/addArticle/";
         public static string GetAllArticlesEndpoint = $"{BaseUrl}api/article/getAllArticles/";
+        public static string GetArticleByIdEndpoint = $"{BaseUrl}api/article/getArticle/";
+        public static string UpdateArticleEndpoint = $"{BaseUrl}api/article/updateArticle/";
     }
 }

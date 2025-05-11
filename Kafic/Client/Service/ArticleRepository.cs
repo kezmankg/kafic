@@ -106,6 +106,22 @@ namespace Client.Service
             var reponse = await _client.GetFromJsonAsync<IList<GroupModel>>(Endpoints.GetAllArticlesEndpoint + email);
             return reponse;
         }
+        public async Task<ArticleModel> GetArticleById(string id)
+        {
+            _client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("bearer", await GetBearerToken());
+
+            var reponse = await _client.GetFromJsonAsync<ArticleModel>(Endpoints.GetArticleByIdEndpoint + id);
+            return reponse;
+        }
+
+        public async Task<bool> UpdateArtile(ArticleModel model)
+        {
+            _client.DefaultRequestHeaders.Authorization =
+               new AuthenticationHeaderValue("bearer", await GetBearerToken());
+            var response = await _client.PutAsJsonAsync(Endpoints.UpdateArticleEndpoint, model);
+            return response.IsSuccessStatusCode;
+        }
         private async Task<string> GetBearerToken()
         {
             return await _localStorage.GetItemAsync<string>("authToken");

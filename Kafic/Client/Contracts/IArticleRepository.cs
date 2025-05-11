@@ -14,5 +14,7 @@ namespace Client.Contracts
         public Task<bool> SubUpdateGroup(SubgroupModel model);
         public Task<bool> AddArticle(ArticleModel group);
         public Task<IList<GroupModel>> GetAllArticles(string email);
+        public Task<ArticleModel> GetArticleById(string id);
+        public Task<bool> UpdateArtile(ArticleModel model);
     }
 }

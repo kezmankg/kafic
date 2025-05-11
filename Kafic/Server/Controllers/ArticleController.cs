@@ -339,5 +339,73 @@ namespace Server.Controllers
             }
 
         }
+
+        [Authorize(AuthenticationSchemes = "Bearer")]
+        [HttpGet("getArticle/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetArticleById(string id)
+        {
+            var location = GetControllerActionNames();
+            try
+            {
+                var article = await _db.Articles.FirstOrDefaultAsync(q => q.Id == int.Parse(id));
+
+                if (article == null)
+                {
+                    return NotFound();
+                }
+
+                var response = _mapper.Map<ArticleModel>(article);
+
+                return Ok(response);
+            }
+            catch (Exception e)
+            {
+                return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
+            }
+
+        }
+
+        [Route("updateArticle")]
+        [HttpPut]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UpdateArticle(ArticleModel model)
+        {
+            var location = GetControllerActionNames();
+            try
+            {
+                var article = await _db.Articles.FirstOrDefaultAsync(q => q.Id == model.Id);
+                if (article == null)
+                {
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                        "sub grupa ne postoji");
+                }
+
+                article.SubgroupId = model.SubgroupId;
+                article.Name = model.Name;
+                article.Price = model.Price;
+
+                _db.Articles.Update(article);
+
+                var changes = await _db.SaveChangesAsync();
+
+                if (changes > 0)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                        "update group-a");
+                }
+            }
+            catch (Exception e)
+            {
+                return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
+            }
+        }
     }
 }
