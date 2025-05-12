@@ -27,6 +27,18 @@
             <DataAnnotationsValidator />
             @* <ValidationSummary /> *@
 
+            <div class="form-group">
+                <label for="group">Izaberi konobara</label>
+                <InputSelect @bind-Value="OrderModel.ApplicationUserEmail" class="form-control" id="group">
+                    <option value="">-- Izaberite konobara --</option>
+                    @foreach (var user in AllUsers)
+                    {
+                        <option value="@user.Email">@user.FullName</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="@(() => OrderModel.ApplicationUserEmail)" />
+            </div>
+
             @foreach (var article in OrderModel.ArticleModels)
             {
                 <div class="row align-items-end mb-3">
@@ -41,7 +53,7 @@
                                     <optgroup label="@($"{group.Name} - {subgroup.Name}")">
                                         @foreach (var artikal in subgroup.Articles)
                                         {
-                                            <option value="@artikal.Id">@artikal.Name (@artikal.Price e)</option>
+                                            <option value="@artikal.Id">@artikal.Name (@artikal.Price.ToString("F2")€)</option>
                                         }
                                     </optgroup>
                                 }
@@ -78,6 +90,7 @@
     private CompanyModel ModelCompany = new CompanyModel();
     private OrderModel OrderModel = new OrderModel();
     private IList<GroupModel> AllArticles = new List<GroupModel>();
+    private IList<RegistrationUserModel> AllUsers = new List<RegistrationUserModel>();
 
     private bool isSuccess = true;
     private string? message;
@@ -96,6 +109,7 @@
             ModelCompany = await _repo.GetCompanyPerEmail(user.Identity.Name);
             AllArticles = await _repoArticle.GetAllArticles(user.Identity.Name);
             OrderModel.ArticleModels.Add(new ArticleModel());
+            AllUsers = await _repo.GetAllUsers(user.Identity.Name);
         }
     }
     private void AddArticle()
