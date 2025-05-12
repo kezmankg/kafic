@@ -201,7 +201,7 @@ namespace Server.Controllers
                         "user ne postoji");
                 }
 
-                var groups = await _db.Groups.Where(q => q.CaffeId == userAdmin.CaffeId).Include(g => g.Subgroups).ToListAsync();
+                var groups = await _db.Groups.AsNoTracking().Where(q => q.CaffeId == userAdmin.CaffeId).Include(g => g.Subgroups).AsSplitQuery().ToListAsync();
 
                 var response = _mapper.Map<IList<GroupModel>>(groups);
                 return Ok(response);
@@ -222,7 +222,7 @@ namespace Server.Controllers
             var location = GetControllerActionNames();
             try
             {
-                var group = await _db.Subgroups.FirstOrDefaultAsync(q => q.Id == int.Parse(id));
+                var group = await _db.Subgroups.AsNoTracking().FirstOrDefaultAsync(q => q.Id == int.Parse(id));
 
                 if (group == null)
                 {
@@ -324,11 +324,12 @@ namespace Server.Controllers
                         "user ne postoji");
                 }
 
-                var groups = await _db.Groups
+                var groups = await _db.Groups.AsNoTracking()
                     .Where(g => g.CaffeId == userAdmin.CaffeId &&
                                 g.Subgroups.Any(sg => sg.Articles.Any()))
                     .Include(g => g.Subgroups.Where(sg => sg.Articles.Any()))
                         .ThenInclude(sg => sg.Articles)
+                    .AsSplitQuery()
                     .ToListAsync();
                 var response = _mapper.Map<IList<GroupModel>>(groups);
                 return Ok(response);
@@ -349,7 +350,7 @@ namespace Server.Controllers
             var location = GetControllerActionNames();
             try
             {
-                var article = await _db.Articles.FirstOrDefaultAsync(q => q.Id == int.Parse(id));
+                var article = await _db.Articles.AsNoTracking().FirstOrDefaultAsync(q => q.Id == int.Parse(id));
 
                 if (article == null)
                 {
@@ -464,7 +465,7 @@ namespace Server.Controllers
                     return BadRequest();
                 }
 
-                var model = await _db.Subgroups.Include(g => g.Articles).FirstOrDefaultAsync(q => q.Id == id);
+                var model = await _db.Subgroups.Include(g => g.Articles).AsSplitQuery().FirstOrDefaultAsync(q => q.Id == id);
                 if (model == null)
                 {
                     return NotFound();
@@ -508,6 +509,7 @@ namespace Server.Controllers
                 var model = await _db.Groups
                     .Include(g => g.Subgroups)
                         .ThenInclude(sg => sg.Articles)
+                    .AsSplitQuery()
                     .FirstOrDefaultAsync(g => g.Id == id);
                 if (model == null)
                 {
