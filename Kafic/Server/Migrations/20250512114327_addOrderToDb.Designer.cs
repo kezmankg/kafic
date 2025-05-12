@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Server.Data;
 
@@ -11,9 +12,11 @@ using Server.Data;
 namespace Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250512114327_addOrderToDb")]
+    partial class addOrderToDb
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -254,30 +257,6 @@ namespace Server.Migrations
                     b.ToTable("Articles");
                 });
 
-            modelBuilder.Entity("Server.Data.Bill", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CaffeId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<double>("Price")
-                        .HasColumnType("float");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CaffeId");
-
-                    b.ToTable("Bills");
-                });
-
             modelBuilder.Entity("Server.Data.Caffe", b =>
                 {
                     b.Property<int>("Id")
@@ -364,41 +343,20 @@ namespace Server.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ApplicationUserEmail")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("CaffeId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("DeskNo")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("DeskNo")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CaffeId");
 
                     b.ToTable("Orders");
-                });
-
-            modelBuilder.Entity("Server.Data.OrderArticle", b =>
-                {
-                    b.Property<int>("ArticleId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("OrderId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Amount")
-                        .HasColumnType("int");
-
-                    b.HasKey("ArticleId", "OrderId");
-
-                    b.HasIndex("OrderId");
-
-                    b.ToTable("OrderArticles");
                 });
 
             modelBuilder.Entity("Server.Data.Subgroup", b =>
@@ -493,17 +451,6 @@ namespace Server.Migrations
                     b.Navigation("Subgroup");
                 });
 
-            modelBuilder.Entity("Server.Data.Bill", b =>
-                {
-                    b.HasOne("Server.Data.Caffe", "Caffe")
-                        .WithMany("Bills")
-                        .HasForeignKey("CaffeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Caffe");
-                });
-
             modelBuilder.Entity("Server.Data.Group", b =>
                 {
                     b.HasOne("Server.Data.Caffe", "Caffe")
@@ -524,25 +471,6 @@ namespace Server.Migrations
                     b.Navigation("Caffe");
                 });
 
-            modelBuilder.Entity("Server.Data.OrderArticle", b =>
-                {
-                    b.HasOne("Server.Data.Article", "Article")
-                        .WithMany("OrderArticles")
-                        .HasForeignKey("ArticleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Server.Data.Order", "Order")
-                        .WithMany("OrderArticles")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Article");
-
-                    b.Navigation("Order");
-                });
-
             modelBuilder.Entity("Server.Data.Subgroup", b =>
                 {
                     b.HasOne("Server.Data.Group", "Group")
@@ -553,16 +481,9 @@ namespace Server.Migrations
                     b.Navigation("Group");
                 });
 
-            modelBuilder.Entity("Server.Data.Article", b =>
-                {
-                    b.Navigation("OrderArticles");
-                });
-
             modelBuilder.Entity("Server.Data.Caffe", b =>
                 {
                     b.Navigation("ApplicationUsers");
-
-                    b.Navigation("Bills");
 
                     b.Navigation("Groups");
 
@@ -572,11 +493,6 @@ namespace Server.Migrations
             modelBuilder.Entity("Server.Data.Group", b =>
                 {
                     b.Navigation("Subgroups");
-                });
-
-            modelBuilder.Entity("Server.Data.Order", b =>
-                {
-                    b.Navigation("OrderArticles");
                 });
 
             modelBuilder.Entity("Server.Data.Subgroup", b =>

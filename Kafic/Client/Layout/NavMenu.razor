@@ -51,6 +51,13 @@
             </AuthorizeView>
         </div>
         <div class="nav-item px-3">
+            <AuthorizeView Roles="Administrator">
+                <NavLink class="nav-link" href="order">
+                    Porudzbine
+                </NavLink>
+            </AuthorizeView>
+        </div>
+        <div class="nav-item px-3">
             <AuthorizeView>
                 <Authorized>
                     <NavLink class="nav-link" href="logout">

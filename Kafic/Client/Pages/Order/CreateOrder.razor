@@ -1,0 +1,126 @@
+﻿@page "/CreateOrder"
+@using Blazored.Toast.Services
+@using Client.Contracts
+@using Client.Static
+@using Share.Models
+
+<h3>Settings</h3>
+
+
+@inject IAuthenticationRepository _repo
+@inject IArticleRepository _repoArticle
+@inject NavigationManager _navManager
+@inject IToastService _toastService
+
+
+<AuthorizeView Roles="Administrator">
+    <Authorized>
+        Settings
+        <hr />
+        <br />
+        @if (!string.IsNullOrWhiteSpace(message))
+        {
+            @message
+        }
+
+        <EditForm Model="OrderModel" OnValidSubmit="HandleAdd" Context="EditForm">
+            <DataAnnotationsValidator />
+            @* <ValidationSummary /> *@
+
+            @foreach (var article in OrderModel.ArticleModels)
+            {
+                <div class="row align-items-end mb-3">
+                    <div class="col-md-6">
+                        <label>Artikal</label>
+                        <InputSelect @bind-Value="article.Id" class="form-control">
+                            <option value="0">-- Izaberite artikal --</option>
+                            @foreach (var group in AllArticles)
+                            {
+                                @foreach (var subgroup in group.Subgroups)
+                                {
+                                    <optgroup label="@($"{group.Name} - {subgroup.Name}")">
+                                        @foreach (var artikal in subgroup.Articles)
+                                        {
+                                            <option value="@artikal.Id">@artikal.Name (@artikal.Price e)</option>
+                                        }
+                                    </optgroup>
+                                }
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="@(() => article.Id)" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label>Količina</label>
+                        <InputNumber @bind-Value="article.Amount" class="form-control" min="1" />
+                        <ValidationMessage For="@(() => article.Amount)" />
+                    </div>
+
+                    <div class="col-md-3 text-end">
+                        <button type="button" class="btn btn-danger mt-4" @onclick="@(() => RemoveArticle(article))">Ukloni</button>
+                    </div>
+                </div>
+                <hr />
+            }
+
+            <button type="button" class="btn btn-secondary mb-3" @onclick="AddArticle">Dodaj artikal</button>
+            <br /> <br />
+            <button class="btn btn-primary" type="submit">Pošalji narudžbinu</button>
+        </EditForm>
+    </Authorized>
+    <NotAuthorized>
+        <p>Nemate pristup ovoj stranici.</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+
+@code {
+    private CompanyModel ModelCompany = new CompanyModel();
+    private OrderModel OrderModel = new OrderModel();
+    private IList<GroupModel> AllArticles = new List<GroupModel>();
+
+    private bool isSuccess = true;
+    private string? message;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var userName = user.Identity.Name;
+            ModelCompany = await _repo.GetCompanyPerEmail(user.Identity.Name);
+            AllArticles = await _repoArticle.GetAllArticles(user.Identity.Name);
+            OrderModel.ArticleModels.Add(new ArticleModel());
+        }
+    }
+    private void AddArticle()
+    {
+        OrderModel.ArticleModels.Add(new ArticleModel());
+    }
+    private void RemoveArticle(ArticleModel stavka)
+    {
+        OrderModel.ArticleModels.Remove(stavka);
+    }
+    private async Task HandleAdd()
+    {
+        // var response = await _repo.UpdateCompany(ModelCompany);
+
+        // if (response)
+        // {
+        //     // Uspešno promenjeno
+        //     message = "Usepesno promenjeno";
+        // }
+        // else
+        // {
+        //     // Prikaz poruke o grešci
+        //     message = "error";
+        // }
+    }
+
+
+}

@@ -10,6 +10,9 @@ namespace Server.Data
         public DbSet<Group> Groups { get; set; }
         public DbSet<Subgroup> Subgroups { get; set; }
         public DbSet<Article> Articles { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<Bill> Bills { get; set; }
+        public DbSet<OrderArticle> OrderArticles { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -30,7 +33,10 @@ namespace Server.Data
                 .WithOne(a => a.Subgroup)
                 .HasForeignKey(a => a.SubgroupId)
                 .OnDelete(DeleteBehavior.Cascade); // kaskadno brisanje za artikle
-            
+
+            modelBuilder.Entity<OrderArticle>().HasKey(sc => new { sc.ArticleId, sc.OrderId });
+
+
         }
     }
 }

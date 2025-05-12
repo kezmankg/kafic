@@ -19,5 +19,6 @@ namespace Share.Models
         [Required(ErrorMessage = "Obavezno polje")]
         [Range(1, int.MaxValue, ErrorMessage = "Morate izabrati podgrupu")]
         public int? SubgroupId { get; set; }
+        public int? Amount { get; set; }
     }
 }

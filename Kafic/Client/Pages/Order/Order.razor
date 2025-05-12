@@ -1,0 +1,48 @@
+﻿@page "/order"
+@using Blazored.Toast.Services
+@using Client.Contracts
+@using Client.Static
+@using Share.Models
+
+<h3>Settings</h3>
+
+
+@inject IAuthenticationRepository _repo
+@inject NavigationManager _navManager
+@inject IToastService _toastService
+
+
+<AuthorizeView Roles="Administrator">
+    <Authorized>
+        <button class="btn btn-danger btn-sm" @onclick="@(() => CreateOrderLink())">Create Order</button>
+    </Authorized>
+    <NotAuthorized>
+        <p>Nemate pristup ovoj stranici.</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+
+@code {
+    private CompanyModel Model = new CompanyModel();
+    private bool isSuccess = true;
+    private string? message;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var userName = user.Identity.Name;
+            Model = await _repo.GetCompanyPerEmail(user.Identity.Name);
+        }
+    }
+    private void CreateOrderLink()
+    {
+        _navManager.NavigateTo($"/CreateOrder");
+    }
+}
