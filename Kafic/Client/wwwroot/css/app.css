@@ -103,17 +103,31 @@ a, .btn-link {
 code {
     color: #c02d76;
 }
-
+/* generic */
 .centered {
     text-align: center;
 }
 
-.login-form {
-    width: 400px;
+.error-message {
+    font-size: 0.8rem;
+    margin-left: 0.5rem;
+    color: red;
+}
+.shadowed-form {
     border-radius: 10px 10px 10px 10px;
     box-shadow: 0 30px 60px 0 #6DD5FA;
     padding: 40px; 
     background-color: white;
+}
+.number-input {
+    width: 5rem;
+}
+.mar-bot {
+    margin-bottom: 0.5rem;
+}
+/* login */
+.login-form {
+    width: 400px;
 }
 
 .login-form hr {
@@ -129,9 +143,21 @@ code {
     margin-left: 0.5rem;
     margin-bottom: 0.2rem;
 }
+/* register css */
+.kafic-reg-form {
+    width: 400px;
+}
 
-.error-message {
-    font-size: 0.8rem;
+.kafic-reg-form hr {
+    color: #6DD5FA;
+    height: 0.3rem;
+}
+
+.kafic-reg-form h3 {
+    font-weight: bold;
+}
+
+.kafic-reg-form label {
     margin-left: 0.5rem;
-    color: red;
+    margin-bottom: 0.2rem;
 }

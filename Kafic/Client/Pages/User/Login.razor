@@ -9,7 +9,7 @@
 @inject NavigationManager _navManager
 @inject IToastService _toastService
 
-<div class="login-form mx-auto">
+<div class="shadowed-form login-form mx-auto">
     <div class="centered">
         <h3>Logovanje</h3>
         <hr />
@@ -30,17 +30,13 @@
         <div class="form-group">
             <label for="firstname">Email</label>
             <InputText @bind-Value="Model.EmailAddress" class="form-control" id="emailaddress" Placeholder="Unesite vas email" />
-            <div class="error-message">
-                <ValidationMessage For="@(() => Model.EmailAddress)" />
-            </div>
+            <ValidationMessage For="@(() => Model.EmailAddress)"  class="error-message"/>
         </div>
         <br>
         <div class="form-group">
             <label for="lastname">Lozinka</label>
             <InputText @bind-Value="Model.Password" type="password" class="form-control" id="password" Placeholder="Unesite lozinku"/>
-            <div class="error-message">
-                <ValidationMessage For="@(() => Model.Password)" />
-            </div>
+            <ValidationMessage For="@(() => Model.Password)" class="error-message" />
         </div>
         <br>
         <div class="centered">            
@@ -52,7 +48,7 @@
 
 @code {
     private LoginModel Model = new LoginModel();
-    private bool isSuccess = true;
+    //private bool isSuccess = true;
     private string? errorMessage;
 
     private async Task HandleLogin()
