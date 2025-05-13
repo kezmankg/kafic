@@ -125,14 +125,13 @@ code {
 .mar-bot {
     margin-bottom: 0.5rem;
 }
+.blue-hr {
+    color: #6DD5FA;
+    height: 0.3rem;
+}
 /* login */
 .login-form {
     width: 400px;
-}
-
-.login-form hr {
-    color: #6DD5FA;
-    height: 0.3rem;
 }
 
 .login-form h3 {
@@ -148,11 +147,6 @@ code {
     width: 400px;
 }
 
-.kafic-reg-form hr {
-    color: #6DD5FA;
-    height: 0.3rem;
-}
-
 .kafic-reg-form h3 {
     font-weight: bold;
 }
@@ -160,4 +154,12 @@ code {
 .kafic-reg-form label {
     margin-left: 0.5rem;
     margin-bottom: 0.2rem;
+}
+/* tables */
+.icon-btn {
+    cursor: pointer;
+    font-size: 18px;
+    border: none;
+    background: none;
+    text-decoration: none;
 }

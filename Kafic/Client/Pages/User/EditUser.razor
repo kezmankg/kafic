@@ -4,62 +4,72 @@
 @using Client.Static
 @using Share.Models
 
-<h3>Settings</h3>
-
-
 @inject IAuthenticationRepository _repo
 @inject NavigationManager _navManager
 @inject IToastService _toastService
 
+<div class="login-form shadowed-form mx-auto">
+    <AuthorizeView Roles="Administrator">
+        <Authorized>
+                <div class="centered">
+                    <h3>Informacije o konobaru</h3>
+                    <br />
+                    <div class="error-message">
+                        @if (!string.IsNullOrWhiteSpace(message))
+                        {
+                            @message
+                        }
+                    </div>
+                </div>
 
-<AuthorizeView Roles="Administrator">
-    <Authorized>
-        Update User Info
-        <hr />
-        <br />
-        @if (!string.IsNullOrWhiteSpace(message))
-        {
-            @message
-        }
+                <EditForm Model="Model" OnValidSubmit="HandleSettingsUser" Context="EditForm1">
+                    <DataAnnotationsValidator />
+                    <div class="form-group mar-bot">
+                        <label for="lastname">Ime i prezime</label>
+                        <InputText @bind-Value="Model.FullName" class="form-control" id="FullName" />
+                        <ValidationMessage For="@(() => Model.FullName)" class="error-message"/>
+                    </div>
+                    <div class="form-group mar-bot">
+                        <label for="lastname">Broj telefona</label>
+                        <InputText @bind-Value="Model.PhoneNumber" class="form-control" id="PhoneNumber" />
+                        <ValidationMessage For="@(() => Model.PhoneNumber)" class="error-message"/>
+                    </div>
+                    <br />
+                    <div class="centered">
+                        <button class="btn btn-primary" type="submit">Izmeni</button>
+                    </div>
+                </EditForm>
+                <hr class="blue-hr"/>
+                <br />
+                <div class="centered">
+                    <h3>Izmena lozinke</h3>                  
+                    <br />
+                    <div class="error-message">
+                    @if (!string.IsNullOrWhiteSpace(message))
+                    {
+                        @message
+                    }
+                    </div>
+                </div>
+                <EditForm Model="ModelEditPass" OnValidSubmit="HandleSettingsUserPass" Context="EditForm2">
+                    <DataAnnotationsValidator />
+                    <div class="form-group">
+                        <label for="lastname">Nova lozinka</label>
+                        <InputText @bind-Value="ModelEditPass.Password" type="password" class="form-control" id="PhoneNumber" />
+                        <ValidationMessage For="@(() => ModelEditPass.Password)" class="error-message" />
+                    </div>
+                    <br />
+                    <div class="centered">
+                        <button class="btn btn-primary" type="submit">Izmeni</button>
+                    </div>
+                </EditForm>
+        </Authorized>
+        <NotAuthorized>
+            <p>Nemate pristup ovoj stranici.</p>
+        </NotAuthorized>
+    </AuthorizeView>
+</div>
 
-        <EditForm Model="Model" OnValidSubmit="HandleSettingsUser" Context="EditForm1">
-            <DataAnnotationsValidator />
-            <div class="form-group">
-                <label for="lastname">Ime i prezime</label>
-                <InputText @bind-Value="Model.FullName" class="form-control" id="FullName" />
-                <ValidationMessage For="@(() => Model.FullName)" />
-            </div>
-
-            <div class="form-group">
-                <label for="lastname">Broj Telefona</label>
-                <InputText @bind-Value="Model.PhoneNumber" class="form-control" id="PhoneNumber" />
-                <ValidationMessage For="@(() => Model.PhoneNumber)" />
-            </div>
-            <button class="btn btn-primary" type="submit">
-                <span class="oi oi-pencil"></span>
-                Create Author
-            </button>
-        </EditForm>
-        <br /><br />
-        Update Password
-        <EditForm Model="ModelEditPass" OnValidSubmit="HandleSettingsUserPass" Context="EditForm2">
-            <DataAnnotationsValidator />
-            <div class="form-group">
-                <label for="lastname">Nova sifra</label>
-                <InputText @bind-Value="ModelEditPass.Password" type="password" class="form-control" id="PhoneNumber" />
-                <ValidationMessage For="@(() => ModelEditPass.Password)" />
-            </div>
-            <button class="btn btn-primary" type="submit">
-                <span class="oi oi-pencil"></span>
-                Create Author
-            </button>
-        </EditForm>
-
-    </Authorized>
-    <NotAuthorized>
-        <p>Nemate pristup ovoj stranici.</p>
-    </NotAuthorized>
-</AuthorizeView>
 
 
 @code {

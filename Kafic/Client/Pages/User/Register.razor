@@ -10,7 +10,7 @@
 
 <div class="shadowed-form kafic-reg-form mx-auto">
     <div class="centered">
-        <h3>Kreiranje novog kafica</h3>
+        <h3 class=".blue-hr">Kreiranje admina</h3>
         <hr />
         <div class="error-message">
             @if (!string.IsNullOrWhiteSpace(errorMessage))
@@ -30,7 +30,7 @@
             <ValidationMessage For="@(() => Model.EmailAddress)" class="error-message"/>
         </div>
         <div class="form-group mar-bot">
-            <label for="lastname">Sifra</label>
+            <label for="lastname">Lozinka</label>
             <InputText @bind-Value="Model.Password" type="password" class="form-control" id="password" />
             <ValidationMessage For="@(() => Model.Password)" class="error-message"/>
         </div>
@@ -45,26 +45,26 @@
             <ValidationMessage For="@(() => Model.PhoneNumber)" class="error-message" />
         </div>
         <div class="form-group mar-bot">
-            <label for="lastname">Ime Kafica</label>
+            <label for="lastname">Ime kafića</label>
             <InputText @bind-Value="Model.CaffeName" class="form-control" id="CaffeName" />
             <ValidationMessage For="@(() => Model.CaffeName)" class="error-message" />
         </div>
 
         <div class="form-group row mar-bot">
             <div class="col-6">
-                <label for="CaffeSeats">Broj Stolova</label>
+                <label for="CaffeSeats">Broj stolova</label>
                 <InputNumber @bind-Value="Model.TablesNo" class="form-control number-input" id="TablesNo" />
                 <ValidationMessage For="@(() => Model.TablesNo)" class="error-message" />
             </div>
             <div class="col-6">
-                <label for="CaffeSeats">Broj Lezaljki</label>
+                <label for="CaffeSeats">Broj ležaljki</label>
                 <InputNumber @bind-Value="Model.SunLoungersNo" class="form-control number-input" id="SunLoungersNo" />
                 <ValidationMessage For="@(() => Model.SunLoungersNo)" class="error-message" />
             </div>    
         </div>
         <br />
         <div class="centered">
-            <button class="btn btn-primary" type="submit">Kreiraj novi kafic</button>
+            <button class="btn btn-primary" type="submit">Kreiraj admina</button>
         </div>
     </EditForm>
 </div>
@@ -76,7 +76,7 @@
 
     private async Task HandleRegistration()
     {
-        var error = "* Desila se greska";// await _repo.Register(Model);
+        var error = await _repo.Register(Model);
 
         if (error == null)
         {

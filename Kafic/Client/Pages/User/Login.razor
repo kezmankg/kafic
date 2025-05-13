@@ -11,7 +11,7 @@
 
 <div class="shadowed-form login-form mx-auto">
     <div class="centered">
-        <h3>Logovanje</h3>
+        <h3 class=".blue-hr">Logovanje</h3>
         <hr />
         <div class="error-message">
         @if (!string.IsNullOrWhiteSpace(errorMessage))
@@ -20,9 +20,7 @@
         }
         </div>
         <br>
-    </div>
-    
-    
+    </div>  
 
     <EditForm Model="Model" OnValidSubmit="HandleLogin">
         <DataAnnotationsValidator />
@@ -44,7 +42,6 @@
         </div>
     </EditForm>
 </div>
-
 
 @code {
     private LoginModel Model = new LoginModel();
