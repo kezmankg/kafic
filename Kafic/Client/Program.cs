@@ -31,5 +31,6 @@ services.AddBlazoredModal();
 
 services.AddTransient<IAuthenticationRepository, AuthenticationRepository>();
 services.AddTransient<IArticleRepository, ArticleRepository>();
+services.AddTransient<IOrderRepository, OrderRepository>();
 
 await builder.Build().RunAsync();

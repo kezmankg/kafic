@@ -8,6 +8,7 @@
 
 
 @inject IAuthenticationRepository _repo
+@inject IOrderRepository _repoOrder
 @inject IArticleRepository _repoArticle
 @inject NavigationManager _navManager
 @inject IToastService _toastService
@@ -26,6 +27,21 @@
         <EditForm Model="OrderModel" OnValidSubmit="HandleAdd" Context="EditForm">
             <DataAnnotationsValidator />
             @* <ValidationSummary /> *@
+            <div class="form-group">
+                <label for="group">Izaberi sto</label>
+                <InputSelect @bind-Value="OrderModel.DeskNo" class="form-control" id="group">
+                    <option value="">-- Izaberite sto --</option>
+                    @for (int i = 1; i <= ModelCompany.TablesNo; i++)
+                    {
+                        <option value="Sto @i">Sto @i</option>
+                    }
+                    @for (int i = 1; i <= ModelCompany.SunLoungersNo; i++)
+                    {
+                        <option value="Lezaljka @i">Ležaljka @i</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="@(() => OrderModel.ApplicationUserEmail)" />
+            </div>
 
             <div class="form-group">
                 <label for="group">Izaberi konobara</label>
@@ -93,7 +109,7 @@
     private IList<RegistrationUserModel> AllUsers = new List<RegistrationUserModel>();
 
     private bool isSuccess = true;
-    private string? message;
+    private string message = string.Empty;
 
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
@@ -108,32 +124,41 @@
             var userName = user.Identity.Name;
             ModelCompany = await _repo.GetCompanyPerEmail(user.Identity.Name);
             AllArticles = await _repoArticle.GetAllArticles(user.Identity.Name);
-            OrderModel.ArticleModels.Add(new ArticleModel());
+            OrderModel.ArticleModels.Add(new ArticleModelOrder { Amount = 1 });
             AllUsers = await _repo.GetAllUsers(user.Identity.Name);
         }
     }
     private void AddArticle()
     {
-        OrderModel.ArticleModels.Add(new ArticleModel());
+        OrderModel.ArticleModels.Add(new ArticleModelOrder { Amount = 1 });
     }
-    private void RemoveArticle(ArticleModel stavka)
+    private void RemoveArticle(ArticleModelOrder stavka)
     {
         OrderModel.ArticleModels.Remove(stavka);
     }
     private async Task HandleAdd()
     {
-        // var response = await _repo.UpdateCompany(ModelCompany);
+        message = "";
+        foreach (var artile in OrderModel.ArticleModels)
+        {
+            if(artile.Id < 1)
+            {
+                message = "Unesite sve nazive dodatih artikala.";
+                return;
+            }
+        }
+        var response = await _repoOrder.AddOrder(OrderModel);
 
-        // if (response)
-        // {
-        //     // Uspešno promenjeno
-        //     message = "Usepesno promenjeno";
-        // }
-        // else
-        // {
-        //     // Prikaz poruke o grešci
-        //     message = "error";
-        // }
+        if (response)
+        {
+            // Uspešno promenjeno
+            _navManager.NavigateTo($"/order");
+        }
+        else
+        {
+            // Prikaz poruke o grešci
+            message = "Došlo je do greške. Molimo kontaktirajte administratora.";
+        }
     }
 
 

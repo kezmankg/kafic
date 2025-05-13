@@ -33,5 +33,7 @@
         public static string DeleteArticleEndpoint = $"{BaseUrl}api/article/deleteArticle/";
         public static string DeleteSubgroupEndpoint = $"{BaseUrl}api/article/deleteSubgroup/";
         public static string DeleteGroupEndpoint = $"{BaseUrl}api/article/deleteGroup/";
+
+        public static string AddOrderEndpoint = $"{BaseUrl}api/order/addOrder/";
     }
 }

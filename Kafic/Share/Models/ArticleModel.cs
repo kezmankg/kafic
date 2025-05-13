@@ -21,4 +21,10 @@ namespace Share.Models
         public int? SubgroupId { get; set; }
         public int? Amount { get; set; }
     }
+
+    public class ArticleModelOrder
+    {
+        public int Id { get; set; }
+        public int Amount { get; set; }
+    }
 }
