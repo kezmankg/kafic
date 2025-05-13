@@ -1,14 +1,13 @@
 ﻿@page "/"
-<h3>Index</h3>
+@inject NavigationManager _navManager
 <AuthorizeView>
     <Authorized>
-        test
+        
     </Authorized>
     <NotAuthorized>
-        test1
+        <p>Nemate pristup ovoj stranici.</p>
     </NotAuthorized>
 </AuthorizeView>
-@testStr
 
 @code {
     [CascadingParameter]
@@ -21,11 +20,7 @@
 
         if (user.Identity.IsAuthenticated)
         {
-            testStr = "logovan";
-        }
-        else
-        {
-            testStr = "nije logovan";
+            _navManager.NavigateTo($"/order");
         }
 
     }
