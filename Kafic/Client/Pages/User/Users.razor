@@ -11,42 +11,78 @@
 
 <AuthorizeView Roles="Administrator">
     <Authorized> 
-        <div>
-            <h2>Konobari</h2>
-            <hr />
-            <br />
-            <span>Dodaj novog konobara</span>
-            <button class="btn-sm btn-secondary ms-2 mb-2" @onclick="@(() => NewUser())">+</button>
-            <br />
-            <table class="table table-hover table-bordered">
-                <thead class="table-active">
-                    <tr>
-                        <th>Ime</th>
-                        <th>Email</th>
-                        <th>Telefon</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var user in AllUsers)
+        <div class="row">
+            <div class="col-md-3 border-end">
+                <h3>Dodavanje konobara</h3>
+                <hr />
+                <div class="error-message">
+                    @if (!string.IsNullOrWhiteSpace(errorMessage))
                     {
-                        <tr>
-                            <td>@user.FullName</td>
-                            <td>@user.Email</td>
-                            <td>@user.PhoneNumber</td>
-                            <td class="text-center">
-                                <a class="icon-btn me-3" @onclick="@(() => EditUser(user.Id))">✏️</a>
-                                @if (!user.Email.ToLower().Equals(userEmail.ToLower()))
-                                {
-                                    <a class="icon-btn " @onclick="@(() => DeleteUser(user.Id))">🗑️</a>
-                                }
-                            </td>
-                        </tr>
+                        @errorMessage
                     }
-                </tbody>
-            </table>
+                </div>
+                <br />
+                <EditForm Model="Model" OnValidSubmit="HandleRegistration" Context="EditForm">
+                    <DataAnnotationsValidator />
+                    @* <ValidationSummary /> *@
+                    <div class="form-group mb-2">
+                        <label for="firstname">Email</label>
+                        <InputText @bind-Value="Model.Email" class="form-control" id="emailaddress" />
+                        <ValidationMessage For="@(() => Model.Email)" class="error-message" />
+                    </div>
+                    <div class="form-group mb-2">
+                        <label for="lastname">Lozinka</label>
+                        <InputText @bind-Value="Model.Password" type="password" class="form-control" id="password" />
+                        <ValidationMessage For="@(() => Model.Password)" class="error-message" />
+                    </div>
+                    <div class="form-group mb-2">
+                        <label for="lastname">Ime i prezime</label>
+                        <InputText @bind-Value="Model.FullName" class="form-control" id="fullname" />
+                        <ValidationMessage For="@(() => Model.FullName)" class="error-message" />
+                    </div>
+                    <div class="form-group mb-4">
+                        <label for="lastname">Telefon</label>
+                        <InputText @bind-Value="Model.PhoneNumber" class="form-control" id="PhoneNumber" />
+                        <ValidationMessage For="@(() => Model.PhoneNumber)" class="error-message" />
+                    </div>
+                    <div class="centered">
+                        <button class="btn btn-primary" type="submit">Dodaj</button>
+                    </div>
+                </EditForm>
+                <hr />
+            </div>
+            <div class="col-md-9 border-end">
+                <h2>Konobari</h2>      
+                <br />
+                <table class="table table-hover table-bordered">
+                    <thead class="table-active">
+                        <tr>
+                            <th>Ime</th>
+                            <th>Email</th>
+                            <th>Telefon</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in AllUsers)
+                        {
+                            <tr>
+                                <td>@user.FullName</td>
+                                <td>@user.Email</td>
+                                <td>@user.PhoneNumber</td>
+                                <td class="text-center">
+                                    <a class="icon-btn" @onclick="@(() => EditUser(user.Id))">✏️</a>
+                                    @if (!user.Email.ToLower().Equals(userEmail.ToLower()))
+                                    {
+                                        <a class="icon-btn " @onclick="@(() => DeleteUser(user.Id))">🗑️</a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
-
     </Authorized>
     <NotAuthorized>
         <p>Nemate pristup ovoj stranici.</p>
@@ -96,6 +132,26 @@
         else
         {
             errorMessage = "Greska pri brisanju";
+        }
+    }
+    private async Task HandleRegistration()
+    {
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+        var userName = user.Identity.Name;
+        Model.AdminEmail = userName;
+
+        var error = await _repo.RegisterUser(Model);
+        if (error == null)
+        {
+            Model = new RegistrationUserModel();
+            errorMessage = "";
+            AllUsers = await _repo.GetAllUsers(userName);
+
+        }
+        else
+        {
+            errorMessage = error;
         }
     }
 }

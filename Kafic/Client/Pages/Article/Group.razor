@@ -13,8 +13,9 @@
 
 <AuthorizeView Roles="Administrator">
     <Authorized>
-        <div class="shadowed-form kafic-reg-form mx-auto ">
-            <div class="centered">
+        <div class="row">
+            <div class="col-md-3 border-end">
+                <br />
                 <h3>Grupe</h3>
                 <hr />
                 <div class="error-message">
@@ -23,43 +24,45 @@
                         @errorMessage
                     }
                 </div>
-            </div>
 
-            <EditForm Model="Model" OnValidSubmit="HandleRegistration" Context="EditForm">
-                <DataAnnotationsValidator />
-                @* <ValidationSummary /> *@
-                <div class="form-group mb-4">
-                    <label for="firstname">Ime grupe</label>
-                    <InputText @bind-Value="Model.Name" class="form-control" id="emailaddress" />
-                    <ValidationMessage For="@(() => Model.Name)" class="error-message" />
-                </div>
-                <div class="centered">
-                    <button class="btn btn-primary" type="submit">Kreiraj novu grupu</button>
-                </div>
-            </EditForm>
-            <hr />
-            <br />
-            <h4>List svih grupa</h4>
-            <table class="table table-hover table-bordered">
-                <thead class="table-active">
-                    <tr>
-                        <th>Ime grupe</th>
-                        <th>Akcije</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var group in AllGroups)
-                    {
+                <EditForm Model="Model" OnValidSubmit="HandleRegistration" Context="EditForm">
+                    <DataAnnotationsValidator />
+                    @* <ValidationSummary /> *@
+                    <div class="form-group mb-4">
+                        <label for="firstname">Ime grupe</label>
+                        <InputText @bind-Value="Model.Name" class="form-control" id="emailaddress" />
+                        <ValidationMessage For="@(() => Model.Name)" class="error-message" />
+                    </div>
+                    <div class="centered">
+                        <button class="btn btn-primary" type="submit">Kreiraj novu grupu</button>
+                    </div>
+                </EditForm>
+                <hr />
+            </div>
+            <div class="col-md-9 border-end" >
+                <br />
+                <h3>List svih grupa</h3>
+                <table class="table table-hover table-bordered">
+                    <thead class="table-active">
                         <tr>
-                            <td>@group.Name</td>
-                            <td class="text-center">
-                                <a class="icon-btn me-3" @onclick="@(() => Edit(group.Id))">✏️</a>
-                                <a class="icon-btn" @onclick="@(() => Delete(group.Id))">🗑️</a>
-                            </td>
+                            <th>Ime grupe</th>
+                            <th></th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach (var group in AllGroups)
+                        {
+                            <tr>
+                                <td>@group.Name</td>
+                                <td class="text-center">
+                                    <a class="icon-btn" @onclick="@(() => Edit(group.Id))">✏️</a>
+                                    <a class="icon-btn" @onclick="@(() => Delete(group.Id))">🗑️</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>            
         </div>
     </Authorized>
     <NotAuthorized>
