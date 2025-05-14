@@ -4,9 +4,6 @@
 @using Client.Static
 @using Share.Models
 
-<h3>Settings</h3>
-
-
 @inject IArticleRepository _repo
 @inject NavigationManager _navManager
 @inject IToastService _toastService
@@ -14,41 +11,40 @@
 
 <AuthorizeView Roles="Administrator">
     <Authorized>
-        Update User Info
-        <hr />
-        <br />
-        @if (!string.IsNullOrWhiteSpace(message))
-        {
-            @message
-        }
-
-        <EditForm Model="Model" OnValidSubmit="HandleUserGroup" Context="EditForm1">
-            <DataAnnotationsValidator />
-            <div class="form-group">
-                <label for="group">Group</label>
-                <InputSelect @bind-Value="Model.GroupId" class="form-control" id="group">
-                    <option value="0">-- Izaberite grupu --</option>
-                    @foreach (var group in AllGroups)
+        <div class="login-form shadowed-form mx-auto">
+            <div class="centered">
+                <h3>Izmene podgrupe</h3>
+                <hr class="blue-hr" />
+                <div class="error-message">
+                    @if (!string.IsNullOrWhiteSpace(message))
                     {
-                        <option value="@group.Id">@group.Name</option>
+                        @message
                     }
-                </InputSelect>
-                <ValidationMessage For="@(() => Model.GroupId)" />
+                </div>
             </div>
-            <div class="form-group">
-                <label for="firstname">Name</label>
-                <InputText @bind-Value="Model.Name" class="form-control" id="emailaddress" />
-                <ValidationMessage For="@(() => Model.Name)" />
-            </div>
-
-            <button class="btn btn-primary" type="submit">
-                <span class="oi oi-pencil"></span>
-                Create Author
-            </button>
-        </EditForm>
-        <br /><br />
-
-
+            <EditForm Model="Model" OnValidSubmit="HandleUserGroup" Context="EditForm1">
+                <DataAnnotationsValidator />
+                <div class="form-group mb-2">
+                    <label for="group">Group</label>
+                    <InputSelect @bind-Value="Model.GroupId" class="form-control" id="group">
+                        <option value="0">-- Izaberite grupu --</option>
+                        @foreach (var group in AllGroups)
+                        {
+                            <option value="@group.Id">@group.Name</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => Model.GroupId)" class="error-message"/>
+                </div>
+                <div class="form-group mb-4">
+                    <label for="firstname">Name</label>
+                    <InputText @bind-Value="Model.Name" class="form-control" id="emailaddress" />
+                    <ValidationMessage For="@(() => Model.Name)" class="error-message" />
+                </div>
+                <div class="centered">            
+                    <button class="btn btn-primary" type="submit">Sačuvaj izmene</button>
+                </div>
+            </EditForm>
+        </div>
     </Authorized>
     <NotAuthorized>
         <p>Nemate pristup ovoj stranici.</p>
@@ -90,7 +86,7 @@
         else
         {
             // Prikaz poruke o grešci
-            message = "error";
+            message = "* Doslo je do greške.";
         }
     }
 

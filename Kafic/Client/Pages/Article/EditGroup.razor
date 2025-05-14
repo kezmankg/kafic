@@ -4,9 +4,6 @@
 @using Client.Static
 @using Share.Models
 
-<h3>Settings</h3>
-
-
 @inject IArticleRepository _repo
 @inject NavigationManager _navManager
 @inject IToastService _toastService
@@ -14,30 +11,29 @@
 
 <AuthorizeView Roles="Administrator">
     <Authorized>
-        Update User Info
-        <hr />
-        <br />
-        @if (!string.IsNullOrWhiteSpace(message))
-        {
-            @message
-        }
-
-        <EditForm Model="Model" OnValidSubmit="HandleUserGroup" Context="EditForm1">
-            <DataAnnotationsValidator />
-            <div class="form-group">
-                <label for="lastname">Ime grupe</label>
-                <InputText @bind-Value="Model.Name" class="form-control" id="Name" />
-                <ValidationMessage For="@(() => Model.Name)" />
+        <div class="shadowed-form login-form mx-auto">
+            <div class="centered">
+                <h3>Izmena grupe</h3>
+                <hr class="blue-hr"/>
+                <div class="error-message">
+                    @if (!string.IsNullOrWhiteSpace(message))
+                    {
+                        @message
+                    }
+                </div>
             </div>
-
-            <button class="btn btn-primary" type="submit">
-                <span class="oi oi-pencil"></span>
-                Create Author
-            </button>
-        </EditForm>
-        <br /><br />
-
-
+             <EditForm Model="Model" OnValidSubmit="HandleUserGroup" Context="EditForm1">
+                <DataAnnotationsValidator />
+                <div class="form-group mb-4">
+                    <label for="lastname">Ime grupe</label>
+                    <InputText @bind-Value="Model.Name" class="form-control" id="Name" />
+                    <ValidationMessage For="@(() => Model.Name)" class="error-message" />
+                </div>
+                <div class="centered">            
+                    <button class="btn btn-primary" type="submit">Sačuvaj izmene</button>
+                </div>
+            </EditForm>
+        </div>
     </Authorized>
     <NotAuthorized>
         <p>Nemate pristup ovoj stranici.</p>
@@ -78,7 +74,7 @@
         else
         {
             // Prikaz poruke o grešci
-            message = "error";
+            message = "* Desila se greška";
         }
     }
 
