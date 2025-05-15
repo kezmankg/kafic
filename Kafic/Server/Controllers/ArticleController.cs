@@ -12,6 +12,7 @@ namespace Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     public class ArticleController : BaseController
     {
         private readonly UserManager<ApplicationUser> _userManager;
