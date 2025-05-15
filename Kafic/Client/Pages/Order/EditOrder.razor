@@ -70,7 +70,7 @@
                     }
                     
                     <h4>Ukupna cena racuna: @totalSum €</h4>
-                    <button class="btn btn-primary" @onclick="() => PayOrder(DeskNo, UserEmail)">Placanje</button>
+                    <button class="btn btn-primary" @onclick="() => PayOrder(DeskNo, userEmail)">Placanje</button>
 
                 </div>
             </div>
@@ -93,7 +93,7 @@
 
     [Parameter]
     public String DeskNo { get; set; } = string.Empty;
-    public String UserEmail { get; set; } = string.Empty;
+    private String userEmail { get; set; } = string.Empty;
     private double totalSum { get; set; }
     private bool isAdmin = false;
 
@@ -105,53 +105,53 @@
         if (user.Identity.IsAuthenticated)
         {
             isAdmin = user.IsInRole("Administrator");
-            UserEmail = user.Identity.Name;
+            userEmail = user.Identity.Name;
             AllOrders = await _repo.GetAllOrder(user.Identity.Name, DeskNo);
             totalSum = AllOrders.Sum(o => o.TotalOrderPrice);
         }
     }
     private async Task RemoveOrder(int id)
     {
-        // var result = await _repoArticle.DeleteArticle(id);
-        // if (result)
-        // {
-        //     errorMessage = "";
-        //     AllArticles = await _repoArticle.GetAllArticles(userEmail);
+        var result = await _repo.DeleteOrder(id);
+        if (result)
+        {
+            message = "";
+            AllOrders = await _repo.GetAllOrder(userEmail, DeskNo);
 
-        // }
-        // else
-        // {
-        //     errorMessage = "Došlo je do greške, molimo kontaktirajte administratora.";
-        // }
+        }
+        else
+        {
+            message = "Došlo je do greške, molimo kontaktirajte administratora.";
+        }
     }
     private async Task RemoveArticle(int idOrder, int idArticle)
     {
-        // var result = await _repoArticle.DeleteArticle(id);
-        // if (result)
-        // {
-        //     errorMessage = "";
-        //     AllArticles = await _repoArticle.GetAllArticles(userEmail);
+        var result = await _repo.DeleteArticle(idOrder, idArticle);
+        if (result)
+        {
+            message = "";
+            AllOrders = await _repo.GetAllOrder(userEmail, DeskNo);
 
-        // }
-        // else
-        // {
-        //     errorMessage = "Došlo je do greške, molimo kontaktirajte administratora.";
-        // }
+        }
+        else
+        {
+            message = "Došlo je do greške, molimo kontaktirajte administratora.";
+        }
     }
     private async Task PayOrder(string descNo, string userEmail)
     {
-    //     var response = await _repo.UpdateGroup(Model);
+        var response = await _repo.PayOrder(descNo, userEmail);
 
-    //     if (response)
-    //     {
-    //         // Uspešno promenjeno
-    //         _navManager.NavigateTo($"/Group/");
-    //     }
-    //     else
-    //     {
-    //         // Prikaz poruke o grešci
-    //         message = "* Desila se greška";
-    //     }
+        if (response)
+        {
+            // Uspešno promenjeno
+            _navManager.NavigateTo($"/Order/");
+        }
+        else
+        {
+            // Prikaz poruke o grešci
+            message = "* Desila se greška";
+        }
     }
 
 }
