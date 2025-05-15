@@ -69,12 +69,12 @@
                 
                 @foreach (var group in AllArticles)
                 {   <br />
-                    <h4>@group.Name</h4>
+                    <h4><b>@group.Name</b></h4>
                     <hr />
 
                     @foreach (var subgroup in group.Subgroups)
                     {
-                        <h5>@subgroup.Name</h5>
+                        <h6><b>@subgroup.Name</b></h6>
 
                         <table class="table">
                             <thead>
@@ -145,7 +145,7 @@
         }
         else
         {
-            errorMessage = "Greska kod dodavanja grupe";
+            errorMessage = "Došlo je do greške, molimo kontaktirajte administratora.";
         }
     }
 
@@ -165,7 +165,7 @@
         }
         else
         {
-            errorMessage = "Greska pri brisanju";
+            errorMessage = "Došlo je do greške, molimo kontaktirajte administratora.";
         }
     }
 }
