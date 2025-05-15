@@ -112,9 +112,46 @@ namespace Server.Controllers
                         "user ne postoji");
                 }
 
-                var orders = await _db.Orders.Where(q => q.CaffeId == user.CaffeId && q.DeskNo == deskno).ToListAsync();
+                var orders = await _db.Orders.Where(q => q.CaffeId == user.CaffeId && q.DeskNo == deskno)
+                    .Include(c => c.OrderArticles)
+                    .ThenInclude(k => k.Article)
+                    .AsSplitQuery()
+                    .ToListAsync();
 
-                var response = _mapper.Map<IList<OrderModel>>(orders);
+                //IList<OrderModel> allOrders = new List<OrderModel>();
+                //foreach (var order in orders) 
+                //{
+                //    OrderModel orderModel = new OrderModel
+                //    {
+                //        DeskNo = order.DeskNo,
+                //        ApplicationUserEmail = order.ApplicationUserEmail,
+                //        Date = DateTime.Now,
+                //        CaffeId = (int)order.CaffeId,
+                //        ArticleModels = new List<ArticleModelOrder>()
+                //    };
+                //    foreach (var article in order.OrderArticles)
+                //    {
+
+                //    }
+                //    allOrders.Add(orderModel);
+                //}
+
+                var response = orders.Select(order => new OrderModel
+                {
+                    Id = order.Id,
+                    CaffeId = order.CaffeId,
+                    DeskNo = order.DeskNo,
+                    Date = order.Date,
+                    ApplicationUserEmail = order.ApplicationUserEmail,
+                    ArticleModels = order.OrderArticles.Select(oa => new ArticleModelOrder
+                    {
+                        Id = oa.ArticleId,       
+                        Amount = oa.Amount,
+                        Name = oa.Article.Name,
+                        Price = oa.Article.Price
+                    }).ToList()
+                }).ToList();
+
                 return Ok(response);
             }
             catch (Exception e)

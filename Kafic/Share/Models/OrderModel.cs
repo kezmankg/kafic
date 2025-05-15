@@ -19,5 +19,7 @@ namespace Share.Models
         [Required(ErrorMessage = "Obavezno polje")]
         [Display(Name = "Konobar")]
         public string? ApplicationUserEmail { get; set; }
+
+        public double TotalOrderPrice => ArticleModels.Sum(a => a.TotalPrice);
     }
 }

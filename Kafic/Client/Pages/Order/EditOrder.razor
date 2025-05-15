@@ -29,10 +29,35 @@
                     {
                         <div>
                             Porudzbina @iterator @order.Date @order.ApplicationUserEmail <br />
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Porudzbina</th> 
+                                        <th>Kolicina</th>
+                                        <th>Cena</th>
+                                        <th>Ukupno</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var article in order.ArticleModels)
+                                    {
+                                        <tr>
+                                            <td>@article.Name</td>
+                                            <td>@article.Amount</td>
+                                            <td>@article.Price €</td>
+                                            <td>@article.TotalPrice €</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                            Ukupno: @order.TotalOrderPrice €
                             <hr class="blue-hr" /> <br />
                         </div>
                         iterator++;
                     }
+                    
+                    <h4>Ukupna cena racuna: @totalSum €</h4>
+                    
 
                 </div>
             </div>
@@ -56,6 +81,8 @@
     [Parameter]
     public String DeskNo { get; set; } = string.Empty;
 
+    private double totalSum { get; set; }
+
     protected override async Task OnParametersSetAsync()
     {
         var authState = await authenticationStateTask;
@@ -64,6 +91,7 @@
         if (user.Identity.IsAuthenticated)
         {
             AllOrders = await _repo.GetAllOrder(user.Identity.Name, DeskNo);
+            totalSum = AllOrders.Sum(o => o.TotalOrderPrice);
         }
     }
     // private async Task HandleUserGroup()
