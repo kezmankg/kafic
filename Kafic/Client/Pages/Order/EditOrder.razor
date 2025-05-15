@@ -9,7 +9,7 @@
 @inject IToastService _toastService
 
 
-<AuthorizeView Roles="Administrator">
+<AuthorizeView>
     <Authorized>
         <div class="">
             <div class="">
@@ -36,6 +36,10 @@
                                         <th>Kolicina</th>
                                         <th>Cena</th>
                                         <th>Ukupno</th>
+                                        @if (isAdmin)
+                                        {
+                                            <th></th>                                            
+                                        }
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -46,18 +50,27 @@
                                             <td>@article.Amount</td>
                                             <td>@article.Price €</td>
                                             <td>@article.TotalPrice €</td>
+                                            @if (isAdmin)
+                                            {
+                                                <a class="icon-btn" @onclick="@(() => RemoveArticle(order.Id, article.Id))">🗑️</a>
+                                            }
                                         </tr>
                                     }
                                 </tbody>
                             </table>
+                            @if (isAdmin)
+                            {
+                                <button class="btn btn-primary" @onclick="() => RemoveOrder(order.Id)">Storniranje porudžbine</button>
+                            }
+                            <br />
                             Ukupno: @order.TotalOrderPrice €
                             <hr class="blue-hr" /> <br />
                         </div>
-                        iterator++;
+                        iterator++;                                                                 
                     }
                     
                     <h4>Ukupna cena racuna: @totalSum €</h4>
-                    
+                    <button class="btn btn-primary" @onclick="() => PayOrder(DeskNo, UserEmail)">Placanje</button>
 
                 </div>
             </div>
@@ -80,8 +93,9 @@
 
     [Parameter]
     public String DeskNo { get; set; } = string.Empty;
-
+    public String UserEmail { get; set; } = string.Empty;
     private double totalSum { get; set; }
+    private bool isAdmin = false;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -90,12 +104,42 @@
 
         if (user.Identity.IsAuthenticated)
         {
+            isAdmin = user.IsInRole("Administrator");
+            UserEmail = user.Identity.Name;
             AllOrders = await _repo.GetAllOrder(user.Identity.Name, DeskNo);
             totalSum = AllOrders.Sum(o => o.TotalOrderPrice);
         }
     }
-    // private async Task HandleUserGroup()
-    // {
+    private async Task RemoveOrder(int id)
+    {
+        // var result = await _repoArticle.DeleteArticle(id);
+        // if (result)
+        // {
+        //     errorMessage = "";
+        //     AllArticles = await _repoArticle.GetAllArticles(userEmail);
+
+        // }
+        // else
+        // {
+        //     errorMessage = "Došlo je do greške, molimo kontaktirajte administratora.";
+        // }
+    }
+    private async Task RemoveArticle(int idOrder, int idArticle)
+    {
+        // var result = await _repoArticle.DeleteArticle(id);
+        // if (result)
+        // {
+        //     errorMessage = "";
+        //     AllArticles = await _repoArticle.GetAllArticles(userEmail);
+
+        // }
+        // else
+        // {
+        //     errorMessage = "Došlo je do greške, molimo kontaktirajte administratora.";
+        // }
+    }
+    private async Task PayOrder(string descNo, string userEmail)
+    {
     //     var response = await _repo.UpdateGroup(Model);
 
     //     if (response)
@@ -108,7 +152,7 @@
     //         // Prikaz poruke o grešci
     //         message = "* Desila se greška";
     //     }
-    // }
+    }
 
 }
 
