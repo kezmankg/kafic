@@ -4,9 +4,6 @@
 @using Client.Static
 @using Share.Models
 
-<h3>Users</h3>
-
-
 @inject IAuthenticationRepository _repo
 @inject IArticleRepository _repoArticle
 @inject NavigationManager _navManager
@@ -16,53 +13,57 @@
 
 <AuthorizeView Roles="Administrator">
     <Authorized>
+        <div class="row">
+            <div class="col-md-3 border-end">
+                <br />
+                <h3>Grupe</h3>
+                <hr />
+                <div class="error-message">
+                    @if (!string.IsNullOrWhiteSpace(errorMessage))
+                    {
+                        @errorMessage
+                    }
+                </div>
 
-        Create New User
-        <hr />
-        <br />
-        @if (!string.IsNullOrWhiteSpace(errorMessage))
-        {
-            @errorMessage
-        }
-
-
-        <EditForm Model="Model" OnValidSubmit="HandleRegistration" Context="EditForm">
-            <DataAnnotationsValidator />
-            @* <ValidationSummary /> *@
-            <div class="form-group">
-                <label for="firstname">Name</label>
-                <InputText @bind-Value="Model.Name" class="form-control" id="emailaddress" />
-                <ValidationMessage For="@(() => Model.Name)" />
-            </div>         
-
-            <button class="btn btn-primary" type="submit">
-                <span class="oi oi-pencil"></span>
-                Create Author
-            </button>
-        </EditForm>
-        <br />
-        OVO RADI POSLE KAO I DODAVANJE FUNKCIJE
-
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Ime Grupe</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var group in AllGroups)
-                {
-                    <tr>
-                        <td>@group.Name</td>
-                        <td>
-                            <button class="btn btn-primary btn-sm" @onclick="@(() => Edit(group.Id))">Izmeni</button>
-                            <button class="btn btn-danger btn-sm" @onclick="@(() => Delete(group.Id))">Obriši</button>
-
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                <EditForm Model="Model" OnValidSubmit="HandleRegistration" Context="EditForm">
+                    <DataAnnotationsValidator />
+                    @* <ValidationSummary /> *@
+                    <div class="form-group mb-4">
+                        <label for="firstname">Ime grupe</label>
+                        <InputText @bind-Value="Model.Name" class="form-control" id="emailaddress" />
+                        <ValidationMessage For="@(() => Model.Name)" class="error-message" />
+                    </div>
+                    <div class="centered">
+                        <button class="btn btn-primary" type="submit">Kreiraj novu grupu</button>
+                    </div>
+                </EditForm>
+                <hr />
+            </div>
+            <div class="col-md-9 border-end" >
+                <br />
+                <h3>List svih grupa</h3>
+                <table class="table table-hover table-bordered">
+                    <thead class="table-active">
+                        <tr>
+                            <th>Ime grupe</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var group in AllGroups)
+                        {
+                            <tr>
+                                <td>@group.Name</td>
+                                <td class="text-center">
+                                    <a class="icon-btn" @onclick="@(() => Edit(group.Id))">✏️</a>
+                                    <a class="icon-btn" @onclick="@(() => Delete(group.Id))">🗑️</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>            
+        </div>
     </Authorized>
     <NotAuthorized>
         <p>Nemate pristup ovoj stranici.</p>

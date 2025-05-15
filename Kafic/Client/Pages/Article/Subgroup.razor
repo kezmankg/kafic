@@ -4,80 +4,85 @@
 @using Client.Static
 @using Share.Models
 
-<h3>Users</h3>
-
-
 @inject IAuthenticationRepository _repo
 @inject IArticleRepository _repoArticle
 @inject NavigationManager _navManager
 @inject IToastService _toastService
 
 
-
 <AuthorizeView Roles="Administrator">
     <Authorized>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3 border-end">
+                    <br>
+                    <h3>Podgrupe</h3>
+                    <hr class="blue-hr" />
+                    <div class="error-message">
+                        @if (!string.IsNullOrWhiteSpace(errorMessage))
+                        {
+                            @errorMessage
+                        }
+                    </div>
+                    <EditForm Model="Model" OnValidSubmit="HandleRegistration" Context="EditForm">
+                        <DataAnnotationsValidator />
+                        @* <ValidationSummary /> *@
+                        <div class="form-group mb-2">
+                            <label for="group">Group</label>
+                            <InputSelect @bind-Value="Model.GroupId" class="form-control" id="group">
+                                <option value="0">-- Izaberite grupu --</option>
+                                @foreach (var group in AllGroups)
+                                {
+                                    <option value="@group.Id">@group.Name</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => Model.GroupId)" class="error-message" />
+                        </div>
+                        <div class="form-group mb-4">
+                            <label for="firstname">Ime podgrupe</label>
+                            <InputText @bind-Value="Model.Name" class="form-control" id="emailaddress" />
+                            <ValidationMessage For="@(() => Model.Name)" class="error-message" />
+                        </div>
+                        <div class="centered mb-4">
+                            <button class="btn btn-primary" type="submit">Kreiraj novu podgrupu</button>
+                        </div>
+                    </EditForm>
+                    <hr>
+                </div>
 
-        Create New User
-        <hr />
-        <br />
-        @if (!string.IsNullOrWhiteSpace(errorMessage))
-        {
-            @errorMessage
-        }
+                <div class="col-md-9 border-end">
+                    <br>  
+                    <h3>Lista svih pogrupa</h3>
 
-
-        <EditForm Model="Model" OnValidSubmit="HandleRegistration" Context="EditForm">
-            <DataAnnotationsValidator />
-            @* <ValidationSummary /> *@
-            <div class="form-group">
-                <label for="group">Group</label>
-                <InputSelect @bind-Value="Model.GroupId" class="form-control" id="group">
-                    <option value="0">-- Izaberite grupu --</option>
-                    @foreach (var group in AllGroups)
-                    {
-                        <option value="@group.Id">@group.Name</option>
-                    }
-                </InputSelect>
-                <ValidationMessage For="@(() => Model.GroupId)" />
+                    <table class="table table-hover table-bordered">
+                        <thead class="table-active">
+                            <tr>
+                                <th>Grupa</th>
+                                <th>Podgrupa</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var group in AllGroupsWithSubgroups)
+                            {
+                                @foreach (var subgroup in group.Subgroups)
+                                {
+                                    <tr>
+                                        <td>@group.Name</td>
+                                        <td>@subgroup.Name</td>
+                                        <td class="text-center">
+                                            <a class="icon-btn" @onclick="@(() => Edit(subgroup.Id))">✏️</a>
+                                            <a class="icon-btn" @onclick="@(() => Delete(subgroup.Id))">🗑️</a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="firstname">Name</label>
-                <InputText @bind-Value="Model.Name" class="form-control" id="emailaddress" />
-                <ValidationMessage For="@(() => Model.Name)" />
-            </div>
-
-            <button class="btn btn-primary" type="submit">
-                <span class="oi oi-pencil"></span>
-                Create Author
-            </button>
-        </EditForm>
-        <br />
-
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Grupa</th>
-                    <th>Podgrupa</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var group in AllGroupsWithSubgroups)
-                {
-                    @foreach (var subgroup in group.Subgroups)
-                    {
-                        <tr>
-                            <td>@group.Name</td>
-                            <td>@subgroup.Name</td>
-                            <td>
-                                <button class="btn btn-primary btn-sm" @onclick="@(() => Edit(subgroup.Id))">Izmeni</button>
-                                <button class="btn btn-danger btn-sm" @onclick="@(() => Delete(subgroup.Id))">Obriši</button>
-
-                            </td>
-                        </tr>
-                    }
-                }
-            </tbody>
-        </table>
+        </div>   
+        
     </Authorized>
     <NotAuthorized>
         <p>Nemate pristup ovoj stranici.</p>
