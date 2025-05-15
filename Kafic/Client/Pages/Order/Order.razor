@@ -15,6 +15,17 @@
 <AuthorizeView>
     <Authorized>
         <button class="btn btn-danger btn-sm" @onclick="@(() => CreateOrderLink())">Create Order</button>
+        Stolovi <br />
+        @for (int i = 1; i <= ModelCompany.TablesNo; i++)
+        {
+            <a href="@($"/EditOrder/Sto {i}")">@i</a> <br />
+        }<br />
+        Lezaljke
+        <br />
+        @for (int i = 1; i <= ModelCompany.SunLoungersNo; i++)
+        {
+            <a href="@($"/EditOrder/Lezaljka {i}")">@i</a> <br />
+        }
     </Authorized>
     <NotAuthorized>
         <p>Nemate pristup ovoj stranici.</p>
@@ -23,9 +34,10 @@
 
 
 @code {
-    private CompanyModel Model = new CompanyModel();
+    private CompanyModel ModelCompany = new CompanyModel();
     private bool isSuccess = true;
     private string? message;
+    private string userName = string.Empty;
 
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
@@ -37,8 +49,8 @@
 
         if (user.Identity.IsAuthenticated)
         {
-            var userName = user.Identity.Name;
-            Model = await _repo.GetCompanyPerEmail(user.Identity.Name);
+            userName = user.Identity.Name;
+            ModelCompany = await _repo.GetCompanyPerEmail(user.Identity.Name);
         }
     }
     private void CreateOrderLink()

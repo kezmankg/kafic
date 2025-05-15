@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Server.Data;
 using Share.Models;
 
@@ -91,6 +92,33 @@ namespace Server.Controllers
             catch (Exception e)
             {
                 await transaction.RollbackAsync();
+                return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
+            }
+
+        }
+
+        [HttpGet("getAllOrders/{email}/{deskno}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetTeamCategoriesTenant(string email, string deskno)
+        {
+            var location = GetControllerActionNames();
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user == null)
+                {
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                        "user ne postoji");
+                }
+
+                var orders = await _db.Orders.Where(q => q.CaffeId == user.CaffeId && q.DeskNo == deskno).ToListAsync();
+
+                var response = _mapper.Map<IList<OrderModel>>(orders);
+                return Ok(response);
+            }
+            catch (Exception e)
+            {
                 return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
             }
 

@@ -14,6 +14,7 @@ namespace Server.Mappings
             CreateMap<Group, GroupModel>().ReverseMap();
             CreateMap<Subgroup, SubgroupModel>().ReverseMap();
             CreateMap<Article, ArticleModel>().ReverseMap();
+            CreateMap<Order, OrderModel>().ReverseMap();
         }
     }
 }

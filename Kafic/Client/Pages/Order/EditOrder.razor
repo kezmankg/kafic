@@ -1,0 +1,86 @@
+﻿@page "/editorder/{DeskNo}"
+@using Blazored.Toast.Services
+@using Client.Contracts
+@using Client.Static
+@using Share.Models
+
+@inject IOrderRepository _repo
+@inject NavigationManager _navManager
+@inject IToastService _toastService
+
+
+<AuthorizeView Roles="Administrator">
+    <Authorized>
+        <div class="">
+            <div class="">
+                <h3>Porudzbine</h3>
+                <hr class="blue-hr" />
+                <div class="error-message">
+                    @if (!string.IsNullOrWhiteSpace(message))
+                    {
+                        @message
+                    }
+                    <h4>@DeskNo</h4>
+                    @{
+                        int iterator = 1;
+                    }
+
+                    @foreach (var order in AllOrders)
+                    {
+                        <div>
+                            Porudzbina @iterator @order.Date @order.ApplicationUserEmail <br />
+                            <hr class="blue-hr" /> <br />
+                        </div>
+                        iterator++;
+                    }
+
+                </div>
+            </div>
+            
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <p>Nemate pristup ovoj stranici.</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+
+@code {
+    private IList<OrderModel> AllOrders = new List<OrderModel>();
+    private bool isSuccess = true;
+    private string? message;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    [Parameter]
+    public String DeskNo { get; set; } = string.Empty;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            AllOrders = await _repo.GetAllOrder(user.Identity.Name, DeskNo);
+        }
+    }
+    // private async Task HandleUserGroup()
+    // {
+    //     var response = await _repo.UpdateGroup(Model);
+
+    //     if (response)
+    //     {
+    //         // Uspešno promenjeno
+    //         _navManager.NavigateTo($"/Group/");
+    //     }
+    //     else
+    //     {
+    //         // Prikaz poruke o grešci
+    //         message = "* Desila se greška";
+    //     }
+    // }
+
+}
+
