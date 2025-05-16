@@ -36,10 +36,7 @@
                                         <th>Kolicina</th>
                                         <th>Cena</th>
                                         <th>Ukupno</th>
-                                        @if (isAdmin)
-                                        {
-                                            <th></th>                                            
-                                        }
+                                        <th></th>                                            
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -50,10 +47,7 @@
                                             <td>@article.Amount</td>
                                             <td>@article.Price €</td>
                                             <td>@article.TotalPrice €</td>
-                                            @if (isAdmin)
-                                            {
-                                                <a class="icon-btn" @onclick="@(() => RemoveArticle(order.Id, article.Id))">🗑️</a>
-                                            }
+                                            <a class="icon-btn" @onclick="@(() => RemoveArticle(order.Id, article.Id))">🗑️</a>
                                         </tr>
                                     }
                                 </tbody>

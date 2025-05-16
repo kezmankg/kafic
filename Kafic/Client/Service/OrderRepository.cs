@@ -47,7 +47,7 @@ namespace Client.Service
 
             _client.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("bearer", await GetBearerToken());
-            var response = await _client.DeleteAsync(Endpoints.DeleteGroupEndpoint + id);
+            var response = await _client.DeleteAsync(Endpoints.DeleteOrderEndpoint + id);
 
             if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
                 return true;
@@ -62,7 +62,7 @@ namespace Client.Service
 
             _client.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("bearer", await GetBearerToken());
-            var response = await _client.DeleteAsync(Endpoints.DeleteGroupEndpoint + idOrder + "/" + idArticle);
+            var response = await _client.DeleteAsync(Endpoints.DeleteOrderArticleEndpoint + idOrder + "/" + idArticle);
 
             if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
                 return true;

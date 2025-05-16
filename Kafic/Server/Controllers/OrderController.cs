@@ -118,24 +118,6 @@ namespace Server.Controllers
                     .AsSplitQuery()
                     .ToListAsync();
 
-                //IList<OrderModel> allOrders = new List<OrderModel>();
-                //foreach (var order in orders) 
-                //{
-                //    OrderModel orderModel = new OrderModel
-                //    {
-                //        DeskNo = order.DeskNo,
-                //        ApplicationUserEmail = order.ApplicationUserEmail,
-                //        Date = DateTime.Now,
-                //        CaffeId = (int)order.CaffeId,
-                //        ArticleModels = new List<ArticleModelOrder>()
-                //    };
-                //    foreach (var article in order.OrderArticles)
-                //    {
-
-                //    }
-                //    allOrders.Add(orderModel);
-                //}
-
                 var response = orders.Select(order => new OrderModel
                 {
                     Id = order.Id,
@@ -153,6 +135,90 @@ namespace Server.Controllers
                 }).ToList();
 
                 return Ok(response);
+            }
+            catch (Exception e)
+            {
+                return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
+            }
+
+        }
+
+        [HttpDelete("deleteOrder/{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeleteOrder(int id)
+        {
+            var location = GetControllerActionNames();
+            try
+            {
+                if (id < 1)
+                {
+                    return BadRequest();
+                }
+
+                var model = await _db.Orders
+                    .FirstOrDefaultAsync(g => g.Id == id);
+                if (model == null)
+                {
+                    return NotFound();
+                }
+                _db.Orders.Remove(model);
+
+                var changes = await _db.SaveChangesAsync();
+                if (changes > 0)
+                {
+                    return NoContent();
+                }
+                else
+                {
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                        "delete order");
+                }
+
+            }
+            catch (Exception e)
+            {
+                return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
+            }
+
+        }
+
+        [HttpDelete("deleteArticle/{idOrder}/{idArticle}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeleteArticle(int idOrder, int idArticle)
+        {
+            var location = GetControllerActionNames();
+            try
+            {
+                if (idOrder < 1 || idArticle < 1)
+                {
+                    return BadRequest();
+                }
+
+                var model = await _db.OrderArticles
+                    .FirstOrDefaultAsync(g => g.OrderId == idOrder && g.ArticleId == idArticle);
+                if (model == null)
+                {
+                    return NotFound();
+                }
+                _db.OrderArticles.Remove(model);
+
+                var changes = await _db.SaveChangesAsync();
+                if (changes > 0)
+                {
+                    return NoContent();
+                }
+                else
+                {
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                        "delete order");
+                }
+
             }
             catch (Exception e)
             {
