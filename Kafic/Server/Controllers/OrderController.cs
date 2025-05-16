@@ -242,13 +242,13 @@ namespace Server.Controllers
                         "user ne postoji");
                 }
 
-                //var bill = new Bill
-                //{
-                //    CaffeId = user.CaffeId,
-                //    CreatedAt = DateTime.UtcNow,
-                //    CreatedBy = user.Email,
-                //    OrderPaids = new List<OrderPaid>() // povezaćemo ga ručno
-                //};
+                var bill = new Bill
+                {
+                    CaffeId = (int)user.CaffeId,
+                    Date = DateTime.UtcNow,
+                    Price = model.TotalSum,
+                    OrderPaids = new List<OrderPaid>() 
+                };
 
                 var orders = await _db.Orders.Where(q => q.CaffeId == user.CaffeId && q.DeskNo == model.DescNo)
                     .Include(c => c.OrderArticles)
@@ -268,11 +268,13 @@ namespace Server.Controllers
                             ArticleId = oa.ArticleId,
                             Amount = oa.Amount,
                         }).ToList(),
-                        //Bill = bill
+                        Bill = bill
                     };
 
                     _db.OrderPaids.Add(orderPaid);
                 }
+
+                _db.Orders.RemoveRange(orders);
 
                 var changes = await _db.SaveChangesAsync();
 

@@ -7,5 +7,6 @@
         public virtual Caffe? Caffe { get; set; }
         public DateTime Date { get; set; }
         public double Price { get; set; }
+        public virtual IList<OrderPaid> OrderPaids { get; set; } = new List<OrderPaid>();
     }
 }

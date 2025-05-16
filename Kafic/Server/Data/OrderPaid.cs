@@ -9,7 +9,7 @@
         public DateTime Date { get; set; }
         public virtual IList<OrderPaidArticle> OrderArticles { get; set; } = new List<OrderPaidArticle>();
         public string? ApplicationUserEmail { get; set; }
-
-        // billId imacemo klasu Order2 koja ce cuvati sve ordere koji su izvrseni i tu ce se cuvati billId
+        public int BillId { get; set; }
+        public virtual Bill? Bill { get; set; }
     }
 }

@@ -39,7 +39,11 @@ namespace Server.Data
             modelBuilder.Entity<OrderArticle>().HasKey(sc => new { sc.ArticleId, sc.OrderId });
             modelBuilder.Entity<OrderPaidArticle>().HasKey(sc => new { sc.ArticleId, sc.OrderPaidId });
 
-
+            modelBuilder.Entity<OrderPaid>()
+                .HasOne(op => op.Bill)
+                .WithMany()
+                .HasForeignKey(op => op.BillId)
+                .OnDelete(DeleteBehavior.Restrict); // Or DeleteBehavior.NoAction
         }
     }
 }
