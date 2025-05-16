@@ -4,9 +4,6 @@
 @using Client.Static
 @using Share.Models
 
-<h3>Settings</h3>
-
-
 @inject IAuthenticationRepository _repo
 @inject NavigationManager _navManager
 @inject IToastService _toastService
@@ -14,18 +11,33 @@
 
 <AuthorizeView>
     <Authorized>
-        <button class="btn btn-danger btn-sm" @onclick="@(() => CreateOrderLink())">Create Order</button>
-        Stolovi <br />
-        @for (int i = 1; i <= ModelCompany.TablesNo; i++)
-        {
-            <a href="@($"/EditOrder/Sto {i}")">@i</a> <br />
-        }<br />
-        Lezaljke
+        <div class="centered">
+            <button class="btn btn-danger btn-sm mt-2 py-3 px-5" @onclick="@(() => CreateOrderLink())">Nova porudžba</button>
+        </div>
         <br />
-        @for (int i = 1; i <= ModelCompany.SunLoungersNo; i++)
-        {
-            <a href="@($"/EditOrder/Lezaljka {i}")">@i</a> <br />
-        }
+        <h3>Stolovi</h3>
+        <div class="container py-3">
+            <div class="row g-4">
+                @for (int i = 1; i <= ModelCompany.TablesNo; i++)
+                {
+                    <div class="col-6 col-md-2">
+                        <a class="number-box d-block py-3" href="@($"/EditOrder/Sto {i}")">@i</a>
+                    </div>
+                }
+            </div>
+        </div>        
+        <br />
+        <h3>Lezaljke</h3>
+        <div class="container py-3">
+            <div class="row g-4">
+                @for (int i = 1; i <= ModelCompany.SunLoungersNo; i++)
+                {
+                    <div class="col-6 col-md-2">
+                        <a class="number-box d-block py-3" href="@($"/EditOrder/Lezaljka {i}")">@i</a>
+                    </div>
+                }
+            </div>
+        </div>
     </Authorized>
     <NotAuthorized>
         <p>Nemate pristup ovoj stranici.</p>

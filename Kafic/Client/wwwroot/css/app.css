@@ -163,3 +163,20 @@ code {
     background: none;
     text-decoration: none;
 }
+/* oreder page */
+.number-box {
+    background-color: #f0f0f0;
+    border-radius: 20px;
+    text-align: center;
+    font-size: 2.5rem;
+    text-decoration: none;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s;
+}
+
+    .number-box:hover {
+        background-color: #dcdcdc;
+    }

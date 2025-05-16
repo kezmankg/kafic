@@ -12,63 +12,62 @@
 <AuthorizeView>
     <Authorized>
         <div class="">
-            <div class="">
-                <h3>Porudzbine</h3>
-                <hr class="blue-hr" />
-                <div class="error-message">
-                    @if (!string.IsNullOrWhiteSpace(message))
-                    {
-                        @message
-                    }
-                    <h4>@DeskNo</h4>
-                    @{
-                        int iterator = 1;
-                    }
-
-                    @foreach (var order in AllOrders)
-                    {
-                        <div>
-                            Porudzbina @iterator @order.Date @order.ApplicationUserEmail <br />
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Porudzbina</th> 
-                                        <th>Kolicina</th>
-                                        <th>Cena</th>
-                                        <th>Ukupno</th>
-                                        <th></th>                                            
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var article in order.ArticleModels)
-                                    {
-                                        <tr>
-                                            <td>@article.Name</td>
-                                            <td>@article.Amount</td>
-                                            <td>@article.Price €</td>
-                                            <td>@article.TotalPrice €</td>
-                                            <a class="icon-btn" @onclick="@(() => RemoveArticle(order.Id, article.Id))">🗑️</a>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                            @if (isAdmin)
-                            {
-                                <button class="btn btn-primary" @onclick="() => RemoveOrder(order.Id)">Storniranje porudžbine</button>
-                            }
-                            <br />
-                            Ukupno: @order.TotalOrderPrice €
-                            <hr class="blue-hr" /> <br />
-                        </div>
-                        iterator++;                                                                 
-                    }
-                    
-                    <h4>Ukupna cena racuna: @totalSum €</h4>
-                    <button class="btn btn-primary" @onclick="() => PayOrder(DeskNo, userEmail)">Placanje</button>
-
-                </div>
+            <h3>Porudžbine za @DeskNo</h3>
+            <hr />
+            <div class="error-message centered">
+                @if (!string.IsNullOrWhiteSpace(message))
+                {
+                    @message
+                }
             </div>
-            
+            @{
+                int iterator = 1;
+            }
+            @foreach (var order in AllOrders)
+            {
+                <div>
+                    <p>Porudžbina @iterator - @order.Date - @order.ApplicationUserEmail</p>
+                    <table class="table table-hover table-bordered">
+                        <thead class="table-active">
+                            <tr>
+                                <th>Porudžbina</th>
+                                <th>Kolicina</th>
+                                <th>Cena</th>
+                                <th>Ukupno</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var article in order.ArticleModels)
+                            {
+                                <tr>
+                                    <td>@article.Name</td>
+                                    <td>@article.Amount</td>
+                                    <td>@article.Price €</td>
+                                    <td>@article.TotalPrice €</td>
+                                    <td class="text-center">
+                                        <a class="icon-btn" @onclick="@(() => RemoveArticle(order.Id, article.Id))">🗑️</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <p class="text-end me-4">Ukupan iznos porudžbine : @order.TotalOrderPrice €</p>
+                    @if (isAdmin)
+                    {
+                        <div class="centered">
+                            <button class="btn btn-primary" @onclick="() => RemoveOrder(order.Id)">Storniranje porudžbine</button>
+                        </div>
+                    }
+                    <br />
+                </div>
+                iterator++;                                                                 
+            }
+            <hr />
+            <div class="centered mb-4">
+                <span class="me-4">Ukupna cena racuna: @totalSum €</span>
+                <button class="btn btn-primary" @onclick="() => PayOrder(DeskNo, userEmail)">Placanje</button>
+            </div>
         </div>
     </Authorized>
     <NotAuthorized>
