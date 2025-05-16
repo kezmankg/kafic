@@ -235,43 +235,44 @@ namespace Server.Controllers
             using var transaction = await _db.Database.BeginTransactionAsync();
             try
             {
-                //var user = await _userManager.FindByEmailAsync(model.ApplicationUserEmail);
-                //if (user == null)
+                var user = await _userManager.FindByEmailAsync(model.UserEmail);
+                if (user == null)
+                {
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                        "user ne postoji");
+                }
+
+                //var bill = new Bill
                 //{
-                //    return this.Unauthorized("No user found for userName:" + model.ApplicationUserEmail);
-                //}
-                //if (user.CaffeId == null)
-                //{
-                //    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
-                //        "Caffe Id je null kod kreiranja porudzbine");
-                //}
-                //Order order = new Order
-                //{
-                //    DeskNo = model.DeskNo,
-                //    ApplicationUserEmail = model.ApplicationUserEmail,
-                //    Date = DateTime.Now,
-                //    CaffeId = (int)user.CaffeId
+                //    CaffeId = user.CaffeId,
+                //    CreatedAt = DateTime.UtcNow,
+                //    CreatedBy = user.Email,
+                //    OrderPaids = new List<OrderPaid>() // povezaćemo ga ručno
                 //};
 
-                //_db.Orders.Add(order);
-                //var changes = await _db.SaveChangesAsync();
-                //if (changes <= 0)
-                //{
-                //    await transaction.RollbackAsync();
-                //    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
-                //    "Create order");
-                //}
+                var orders = await _db.Orders.Where(q => q.CaffeId == user.CaffeId && q.DeskNo == model.DescNo)
+                    .Include(c => c.OrderArticles)
+                    .AsSplitQuery()
+                    .ToListAsync();
 
-                //foreach (var article in model.ArticleModels)
-                //{
-                //    OrderArticle orderArticle = new OrderArticle
-                //    {
-                //        ArticleId = article.Id,
-                //        OrderId = order.Id,
-                //        Amount = article.Amount,
-                //    };
-                //    _db.OrderArticles.Add(orderArticle);
-                //}
+                foreach (var order in orders)
+                {
+                    var orderPaid = new OrderPaid
+                    {
+                        DeskNo = order.DeskNo,
+                        CaffeId = order.CaffeId,
+                        Date = order.Date,
+                        ApplicationUserEmail = order.ApplicationUserEmail,
+                        OrderArticles = order.OrderArticles.Select(oa => new OrderPaidArticle
+                        {
+                            ArticleId = oa.ArticleId,
+                            Amount = oa.Amount,
+                        }).ToList(),
+                        //Bill = bill
+                    };
+
+                    _db.OrderPaids.Add(orderPaid);
+                }
 
                 var changes = await _db.SaveChangesAsync();
 

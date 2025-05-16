@@ -12,6 +12,7 @@ namespace Server.Data
         public DbSet<Article> Articles { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderPaid> OrderPaids { get; set; }
+        public DbSet<OrderPaidArticle> OrderPaidArticles { get; set; }
         public DbSet<Bill> Bills { get; set; }
         public DbSet<OrderArticle> OrderArticles { get; set; }
 
@@ -36,6 +37,7 @@ namespace Server.Data
                 .OnDelete(DeleteBehavior.Cascade); // kaskadno brisanje za artikle
 
             modelBuilder.Entity<OrderArticle>().HasKey(sc => new { sc.ArticleId, sc.OrderId });
+            modelBuilder.Entity<OrderPaidArticle>().HasKey(sc => new { sc.ArticleId, sc.OrderPaidId });
 
 
         }

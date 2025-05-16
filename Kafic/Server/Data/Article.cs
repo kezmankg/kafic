@@ -12,5 +12,6 @@ namespace Server.Data
         public int? SubgroupId { get; set; }
         public virtual Subgroup? Subgroup { get; set; }
         public virtual IList<OrderArticle> OrderArticles { get; set; } = new List<OrderArticle>();
+        public virtual IList<OrderPaidArticle> OrderPaidArticles { get; set; } = new List<OrderPaidArticle>();
     }
 }
