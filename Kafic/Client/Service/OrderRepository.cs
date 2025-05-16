@@ -70,14 +70,15 @@ namespace Client.Service
             return false;
         }
 
-        public async Task<bool> PayOrder(string descNo, string userEmail)
+        public async Task<bool> PayOrder(string descNo, string userEmail, double totalSum)
         {
             _client.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("bearer", await GetBearerToken());
             PayOrderModel model = new PayOrderModel();
             model.DescNo = descNo;
             model.UserEmail = userEmail;
-            var response = await _client.PostAsJsonAsync(Endpoints.AddOrderEndpoint, model);
+            model.TotalSum = totalSum;
+            var response = await _client.PostAsJsonAsync(Endpoints.PayOrderEndpoint, model);
             return response.IsSuccessStatusCode;
         }
 

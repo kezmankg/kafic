@@ -10,5 +10,6 @@ namespace Share.Models
     {
         public string DescNo { get; set; } = string.Empty;
         public string UserEmail { get; set; } = string.Empty;
+        public double TotalSum { get; set; }
     }
 }

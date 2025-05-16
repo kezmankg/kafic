@@ -11,6 +11,7 @@ namespace Server.Data
         public DbSet<Subgroup> Subgroups { get; set; }
         public DbSet<Article> Articles { get; set; }
         public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderPaid> OrderPaids { get; set; }
         public DbSet<Bill> Bills { get; set; }
         public DbSet<OrderArticle> OrderArticles { get; set; }
 

@@ -134,7 +134,7 @@
     }
     private async Task PayOrder(string descNo, string userEmail)
     {
-        var response = await _repo.PayOrder(descNo, userEmail);
+        var response = await _repo.PayOrder(descNo, userEmail, totalSum);
 
         if (response)
         {

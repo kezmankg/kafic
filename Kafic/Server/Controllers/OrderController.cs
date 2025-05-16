@@ -158,7 +158,7 @@ namespace Server.Controllers
                     return BadRequest();
                 }
 
-                var model = await _db.Orders
+                var model = await _db.Orders.Include(o => o.OrderArticles)
                     .FirstOrDefaultAsync(g => g.Id == id);
                 if (model == null)
                 {
@@ -222,6 +222,74 @@ namespace Server.Controllers
             }
             catch (Exception e)
             {
+                return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
+            }
+
+        }
+
+        [Route("payOrder")]
+        [HttpPost]
+        public async Task<IActionResult> PayOrder([FromBody] PayOrderModel model)
+        {
+            var location = GetControllerActionNames();
+            using var transaction = await _db.Database.BeginTransactionAsync();
+            try
+            {
+                //var user = await _userManager.FindByEmailAsync(model.ApplicationUserEmail);
+                //if (user == null)
+                //{
+                //    return this.Unauthorized("No user found for userName:" + model.ApplicationUserEmail);
+                //}
+                //if (user.CaffeId == null)
+                //{
+                //    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                //        "Caffe Id je null kod kreiranja porudzbine");
+                //}
+                //Order order = new Order
+                //{
+                //    DeskNo = model.DeskNo,
+                //    ApplicationUserEmail = model.ApplicationUserEmail,
+                //    Date = DateTime.Now,
+                //    CaffeId = (int)user.CaffeId
+                //};
+
+                //_db.Orders.Add(order);
+                //var changes = await _db.SaveChangesAsync();
+                //if (changes <= 0)
+                //{
+                //    await transaction.RollbackAsync();
+                //    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                //    "Create order");
+                //}
+
+                //foreach (var article in model.ArticleModels)
+                //{
+                //    OrderArticle orderArticle = new OrderArticle
+                //    {
+                //        ArticleId = article.Id,
+                //        OrderId = order.Id,
+                //        Amount = article.Amount,
+                //    };
+                //    _db.OrderArticles.Add(orderArticle);
+                //}
+
+                var changes = await _db.SaveChangesAsync();
+
+                if (changes > 0)
+                {
+                    await transaction.CommitAsync();
+                    return Ok();
+                }
+                else
+                {
+                    await transaction.RollbackAsync();
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                        "Create order");
+                }
+            }
+            catch (Exception e)
+            {
+                await transaction.RollbackAsync();
                 return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
             }
 

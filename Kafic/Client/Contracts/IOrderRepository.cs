@@ -8,7 +8,7 @@ namespace Client.Contracts
         public Task<IList<OrderModel>> GetAllOrder(string email, string deskno);
         public Task<bool> DeleteOrder(int id);
         public Task<bool> DeleteArticle(int idOrder, int idArticle);
-        public Task<bool> PayOrder(string descNo, string userEmail);
+        public Task<bool> PayOrder(string descNo, string userEmail, double totalSum);
 
     }
 }
