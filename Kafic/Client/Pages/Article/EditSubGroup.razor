@@ -44,6 +44,9 @@
                     <button class="btn btn-primary" type="submit">Sačuvaj izmene</button>
                 </div>
             </EditForm>
+            <div class="text-end mt-2">
+                <a href="/subgroup">Nazad</a>
+            </div>
         </div>
     </Authorized>
     <NotAuthorized>
@@ -72,6 +75,10 @@
         {
             Model = await _repo.GetSubGroupById(Id);
             AllGroups = await _repo.GetAllGroup(user.Identity.Name);
+        }
+        else
+        {
+            _navManager.NavigateTo("/login");
         }
     }
     private async Task HandleUserGroup()

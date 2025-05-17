@@ -63,6 +63,9 @@
                         <button class="btn btn-primary" type="submit">Izmeni</button>
                     </div>
                 </EditForm>
+            <div class="text-end mt-2">
+                <a href="/users">Nazad</a>
+            </div>
         </Authorized>
         <NotAuthorized>
             <p>Nemate pristup ovoj stranici.</p>
@@ -93,6 +96,10 @@
         {
             Model = await _repo.GetUserPerId(Id);
             ModelEditPass.Id = Model.Id;
+        }
+        else
+        {
+            _navManager.NavigateTo("/login");
         }
     }
     private async Task HandleSettingsUser()

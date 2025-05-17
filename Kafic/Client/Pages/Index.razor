@@ -2,7 +2,7 @@
 @inject NavigationManager _navManager
 <AuthorizeView>
     <Authorized>
-        
+
     </Authorized>
     <NotAuthorized>
         <p>Nemate pristup ovoj stranici.</p>
@@ -21,6 +21,10 @@
         if (user.Identity.IsAuthenticated)
         {
             _navManager.NavigateTo($"/order");
+        }
+        else
+        {
+            _navManager.NavigateTo($"/login");
         }
 
     }

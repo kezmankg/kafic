@@ -89,6 +89,10 @@
             userEmail = user.Identity.Name;
             AllGroups = await _repoArticle.GetAllGroup(user.Identity.Name);
         }
+        else
+        {
+            _navManager.NavigateTo("/login");
+        }
     }
 
     private async Task HandleRegistration()

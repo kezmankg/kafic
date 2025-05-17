@@ -108,6 +108,10 @@
             userEmail = user.Identity.Name;
             AllUsers = await _repo.GetAllUsers(user.Identity.Name);
         }
+        else
+        {
+            _navManager.NavigateTo("/login");
+        }
     }
 
     private void NewUser()

@@ -53,7 +53,7 @@
                     <div class="form-group mb-4">
                         <label for="Price">Cena</label>
                         <InputNumber @bind-Value="Model.Price" class="form-control" id="Price" />
-                        <ValidationMessage For="@(() => Model.Price)" class />
+                        <ValidationMessage For="@(() => Model.Price)" class="error-message" />
                     </div>
                     <div class="centered">            
                         <button class="btn btn-primary" type="submit">Dodaj</button>
@@ -66,7 +66,7 @@
                 <div class="centered">
                     <h3>Lista svih artikla</h3>
                 </div>
-                
+
                 @foreach (var group in AllArticles)
                 {   <br />
                     <h4><b>@group.Name</b></h4>
@@ -76,8 +76,8 @@
                     {
                         <h6><b>@subgroup.Name</b></h6>
 
-                        <table class="table">
-                            <thead>
+                        <table class="table table-hover table-bordered">
+                            <thead class="table-active">
                                 <tr>
                                     <th>Ime</th>
                                     <th>Cena</th>
@@ -90,7 +90,7 @@
                                     <tr>
                                         <td>@article.Name</td>
                                         <td>@article.Price</td>
-                                        <td>
+                                        <td class="text-center">
                                             <a class="icon-btn" @onclick="@(() => Edit(article.Id))">✏️</a>
                                             <a class="icon-btn " @onclick="@(() => Delete(article.Id))">🗑️</a>
                                         </td>
@@ -102,7 +102,7 @@
                 }
             </div>
         </div>      
-        
+
     </Authorized>
     <NotAuthorized>
         <p>Nemate pristup ovoj stranici.</p>
@@ -129,6 +129,10 @@
             userEmail = user.Identity.Name;
             AllGroupsWithSubgroups = await _repoArticle.GetAllGroupWithSubgroup(user.Identity.Name);
             AllArticles = await _repoArticle.GetAllArticles(user.Identity.Name);
+        }
+        else
+        {
+            _navManager.NavigateTo("/login");
         }
     }
 
