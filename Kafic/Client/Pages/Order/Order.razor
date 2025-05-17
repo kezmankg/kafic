@@ -12,9 +12,9 @@
 <AuthorizeView>
     <Authorized>
         <div class="centered">
-            <button class="btn btn-danger btn-sm mt-2 py-3 px-5" @onclick="@(() => CreateOrderLink())">Nova porudžba</button>
+            <button class="btn btn-danger py-3 px-5" @onclick="@(() => CreateOrderLink())">Nova porudžba</button>
         </div>
-        <br />
+        <hr />
         <h3>Stolovi</h3>
         <div class="container py-3">
             <div class="row g-4">
@@ -27,7 +27,8 @@
             </div>
         </div>        
         <br />
-        <h3>Lezaljke</h3>
+        <hr />
+        <h3>Ležaljke</h3>
         <div class="container py-3">
             <div class="row g-4">
                 @for (int i = 1; i <= ModelCompany.SunLoungersNo; i++)
@@ -63,6 +64,10 @@
         {
             userName = user.Identity.Name;
             ModelCompany = await _repo.GetCompanyPerEmail(user.Identity.Name);
+        }
+        else
+        {
+            _navManager.NavigateTo("/login");
         }
     }
     private void CreateOrderLink()

@@ -110,6 +110,10 @@
             AllGroups = await _repoArticle.GetAllGroup(user.Identity.Name);
             AllGroupsWithSubgroups = await _repoArticle.GetAllGroupWithSubgroup(user.Identity.Name);
         }
+        else
+        {
+            _navManager.NavigateTo("/login");
+        }
     }
 
     private async Task HandleRegistration()

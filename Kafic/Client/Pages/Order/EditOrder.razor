@@ -12,6 +12,7 @@
 <AuthorizeView>
     <Authorized>
         <div class="">
+            <button class="btn btn-secondary" style="float: right;" @onclick="() => GoBack()">Nazad</button>
             <h3>Porudžbine za @DeskNo</h3>
             <hr />
             <div class="error-message centered">
@@ -31,7 +32,7 @@
                         <thead class="table-active">
                             <tr>
                                 <th>Porudžbina</th>
-                                <th>Kolicina</th>
+                                <th>Količina</th>
                                 <th>Cena</th>
                                 <th>Ukupno</th>
                                 <th></th>
@@ -65,8 +66,8 @@
             }
             <hr />
             <div class="centered mb-4">
-                <span class="me-4">Ukupna cena racuna: @totalSum €</span>
-                <button class="btn btn-primary" @onclick="() => PayOrder(DeskNo, userEmail)">Placanje</button>
+                <span class="me-4">Ukupna cena računa: @totalSum €</span>
+                <button class="btn btn-primary" @onclick="() => PayOrder(DeskNo, userEmail)">Plaćanje</button>
             </div>
         </div>
     </Authorized>
@@ -101,6 +102,10 @@
             userEmail = user.Identity.Name;
             AllOrders = await _repo.GetAllOrder(user.Identity.Name, DeskNo);
             totalSum = AllOrders.Sum(o => o.TotalOrderPrice);
+        }
+        else
+        {
+            _navManager.NavigateTo($"/Login");
         }
     }
     private async Task RemoveOrder(int id)
@@ -146,6 +151,9 @@
             message = "* Desila se greška";
         }
     }
-
+    private void GoBack()
+    {
+        _navManager.NavigateTo($"/Order/");
+    }
 }
 
