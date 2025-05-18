@@ -115,6 +115,7 @@
         {
             message = "";
             AllOrders = await _repo.GetAllOrder(userEmail, DeskNo);
+            totalSum = AllOrders.Sum(o => o.TotalOrderPrice);
 
         }
         else
@@ -129,6 +130,7 @@
         {
             message = "";
             AllOrders = await _repo.GetAllOrder(userEmail, DeskNo);
+            totalSum = AllOrders.Sum(o => o.TotalOrderPrice);
 
         }
         else
