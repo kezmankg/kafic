@@ -64,13 +64,21 @@ namespace Server.Controllers
                     "Create order");
                 }
 
-                foreach (var article in model.ArticleModels)
+                var groupedArticles = model.ArticleModels
+                    .GroupBy(a => a.Id)
+                    .Select(g => new
+                    {
+                        ArticleId = g.Key,
+                        TotalAmount = g.Sum(a => a.Amount)
+                    });
+
+                foreach (var article in groupedArticles)
                 {
                     OrderArticle orderArticle = new OrderArticle
                     {
-                        ArticleId = article.Id,
+                        ArticleId = article.ArticleId,
                         OrderId = order.Id,
-                        Amount = article.Amount,
+                        Amount = article.TotalAmount,
                     };
                     _db.OrderArticles.Add(orderArticle);
                 }

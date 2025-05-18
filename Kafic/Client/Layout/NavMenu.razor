@@ -9,51 +9,37 @@
 
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
     <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                Home
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <AuthorizeView Roles="Administrator">
+        <AuthorizeView Roles="Administrator">
+            <div class="nav-item px-3">            
                 <NavLink class="nav-link" href="settings">
-                    Kafic Settings
-                </NavLink>
-            </AuthorizeView>
-        </div>
-        <div class="nav-item px-3">
-            <AuthorizeView Roles="Administrator">
+                    Caffe
+                </NavLink>           
+            </div>
+            <div class="nav-item px-3">
                 <NavLink class="nav-link" href="users">
                     Administracija konobara
                 </NavLink>
-            </AuthorizeView>
-        </div>
-        
-        <div class="nav-item px-3">
-            <AuthorizeView Roles="Administrator">
+            </div>      
+            <div class="nav-item px-3">
                 <NavLink class="nav-link" href="group">
                     Grupe
                 </NavLink>
-            </AuthorizeView>
-        </div>
-        <div class="nav-item px-3">
-            <AuthorizeView Roles="Administrator">
+            </div>
+            <div class="nav-item px-3">
                 <NavLink class="nav-link" href="subgroup">
                     Podgrupe
                 </NavLink>
-            </AuthorizeView>
-        </div>
-        <div class="nav-item px-3">
-            <AuthorizeView Roles="Administrator">
+            </div>
+            <div class="nav-item px-3">
                 <NavLink class="nav-link" href="article">
                     Artikli
                 </NavLink>
-            </AuthorizeView>
-        </div>
+            </div>
+        </AuthorizeView>
         <div class="nav-item px-3">
             <AuthorizeView>
                 <NavLink class="nav-link" href="order">
-                    Porudzbine
+                    Porudžbine
                 </NavLink>
             </AuthorizeView>
         </div>
