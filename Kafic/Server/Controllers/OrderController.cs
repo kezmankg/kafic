@@ -305,5 +305,44 @@ namespace Server.Controllers
             }
 
         }
+
+        [Route("updateDiscount")]
+        [HttpPut]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UpdateOrder(ArticleDiscountModelOrder model)
+        {
+            var location = GetControllerActionNames();
+            try
+            {
+                //var group = await _db.Groups.FirstOrDefaultAsync(q => q.Id == model.Id);
+                //if (group == null)
+                //{
+                //    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                //        "grupa ne postoji");
+                //}
+
+                //group.Name = model.Name;
+
+                //_db.Groups.Update(group);
+
+                var changes = await _db.SaveChangesAsync();
+
+                if (changes > 0)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                        "update group-a");
+                }
+            }
+            catch (Exception e)
+            {
+                return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
+            }
+        }
     }
 }

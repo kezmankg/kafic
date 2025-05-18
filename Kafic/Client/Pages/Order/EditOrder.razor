@@ -36,6 +36,10 @@
                                 <th>Cena</th>
                                 <th>Ukupno</th>
                                 <th></th>
+                                @if (isAdmin)
+                                {
+                                    <th>Popust (%)</th>
+                                }
                             </tr>
                         </thead>
                         <tbody>
@@ -49,6 +53,19 @@
                                     <td class="text-center">
                                         <a class="icon-btn" @onclick="@(() => RemoveArticle(order.Id, article.Id))">🗑️</a>
                                     </td>
+                                    @if (isAdmin)
+                                    {
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <input type="number" min="0" max="100" class="form-control form-control-sm" style="width: 70px;"
+                                                       @bind="@article.Discount" />
+                                                <button class="btn btn-sm btn-success ms-2"
+                                                        @onclick="() => ApplyDiscount(order.Id, article.Id, article.Discount)">
+                                                    Primeni
+                                                </button>
+                                            </div>
+                                        </td>
+                                    }
                                 </tr>
                             }
                         </tbody>
@@ -157,5 +174,30 @@
     {
         _navManager.NavigateTo($"/Order/");
     }
+
+    private async Task ApplyDiscount(int orderId, int articleId, double discountPercentage)
+    {
+        ArticleDiscountModelOrder articleDiscountModelOrder = new ArticleDiscountModelOrder
+            {
+                OrderId = orderId,
+                ArticleId = articleId,
+                Discount = discountPercentage,
+                UserEmail = userEmail,
+                DeskNo = DeskNo
+            };
+        var result = await _repo.UpdateDiscount(articleDiscountModelOrder);
+        if (result)
+        {
+            message = "";
+            AllOrders = await _repo.GetAllOrder(userEmail, DeskNo);
+            totalSum = AllOrders.Sum(o => o.TotalOrderPrice);
+
+        }
+        else
+        {
+            message = "Došlo je do greške, molimo kontaktirajte administratora.";
+        }
+    }
+
 }
 

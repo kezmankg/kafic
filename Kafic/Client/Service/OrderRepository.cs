@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Share.Models;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Reflection;
 
 namespace Client.Service
 {
@@ -79,6 +80,14 @@ namespace Client.Service
             model.UserEmail = userEmail;
             model.TotalSum = totalSum;
             var response = await _client.PostAsJsonAsync(Endpoints.PayOrderEndpoint, model);
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<bool> UpdateDiscount(ArticleDiscountModelOrder model)
+        {
+            _client.DefaultRequestHeaders.Authorization =
+               new AuthenticationHeaderValue("bearer", await GetBearerToken());
+            var response = await _client.PutAsJsonAsync(Endpoints.UpdateDiscountEndpoint, model);
             return response.IsSuccessStatusCode;
         }
 

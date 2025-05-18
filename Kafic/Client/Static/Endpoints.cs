@@ -39,5 +39,6 @@
         public static string DeleteOrderEndpoint = $"{BaseUrl}api/order/deleteOrder/";
         public static string DeleteOrderArticleEndpoint = $"{BaseUrl}api/order/deleteArticle/";
         public static string PayOrderEndpoint = $"{BaseUrl}api/order/payOrder/";
+        public static string UpdateDiscountEndpoint = $"{BaseUrl}api/order/updateDiscount/";
     }
 }

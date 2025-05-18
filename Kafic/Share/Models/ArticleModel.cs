@@ -31,5 +31,16 @@ namespace Share.Models
         public double Price { get; set; }
 
         public double TotalPrice => Amount * Price;
+        public double Discount { get; set; }
+    }
+
+    public class ArticleDiscountModelOrder
+    {
+        public int ArticleId { get; set; }
+        public int OrderId { get; set; }
+        public double Discount { get; set; }
+        public string UserEmail { get; set; } = string.Empty;
+        public string DeskNo { get; set; } = string.Empty;
+
     }
 }
