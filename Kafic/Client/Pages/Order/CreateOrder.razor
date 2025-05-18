@@ -4,56 +4,58 @@
 @using Client.Static
 @using Share.Models
 
-<h3>Settings</h3>
-
-
 @inject IAuthenticationRepository _repo
 @inject IOrderRepository _repoOrder
 @inject IArticleRepository _repoArticle
 @inject NavigationManager _navManager
 @inject IToastService _toastService
 
-
 <AuthorizeView>
     <Authorized>
-        Settings
+        <button class="btn btn-secondary" style="float: right;" @onclick="() => GoBack()">Nazad</button>
+        <h3>Kreiranje porudžbinu</h3>
         <hr />
         <br />
-        @if (!string.IsNullOrWhiteSpace(message))
-        {
-            @message
-        }
-
+        <div class="centered error-message">
+            @if (!string.IsNullOrWhiteSpace(message))
+            {
+                @message
+            }
+        </div>
         <EditForm Model="OrderModel" OnValidSubmit="HandleAdd" Context="EditForm">
             <DataAnnotationsValidator />
             @* <ValidationSummary /> *@
-            <div class="form-group">
-                <label for="group">Izaberi sto</label>
-                <InputSelect @bind-Value="OrderModel.DeskNo" class="form-control" id="group">
-                    <option value="">-- Izaberite sto --</option>
-                    @for (int i = 1; i <= ModelCompany.TablesNo; i++)
-                    {
-                        <option value="Sto @i">Sto @i</option>
-                    }
-                    @for (int i = 1; i <= ModelCompany.SunLoungersNo; i++)
-                    {
-                        <option value="Lezaljka @i">Ležaljka @i</option>
-                    }
-                </InputSelect>
-                <ValidationMessage For="@(() => OrderModel.ApplicationUserEmail)" />
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label for="group">Izaberi sto</label>
+                    <InputSelect @bind-Value="OrderModel.DeskNo" class="form-control" id="group">
+                        <option value="">-- Izaberite sto --</option>
+                        @for (int i = 1; i <= ModelCompany.TablesNo; i++)
+                        {
+                            <option value="Sto @i">Sto @i</option>
+                        }
+                        @for (int i = 1; i <= ModelCompany.SunLoungersNo; i++)
+                        {
+                            <option value="Lezaljka @i">Ležaljka @i</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => OrderModel.ApplicationUserEmail)" class="error-message" />
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="group">Izaberi konobara</label>
+                    <InputSelect @bind-Value="OrderModel.ApplicationUserEmail" class="form-control" id="group">
+                        <option value="">-- Izaberite konobara --</option>
+                        @foreach (var user in AllUsers)
+                        {
+                            <option value="@user.Email">@user.FullName</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => OrderModel.ApplicationUserEmail)" class="error-message"/>
+                </div>
             </div>
+            <br />
+            <hr />
 
-            <div class="form-group">
-                <label for="group">Izaberi konobara</label>
-                <InputSelect @bind-Value="OrderModel.ApplicationUserEmail" class="form-control" id="group">
-                    <option value="">-- Izaberite konobara --</option>
-                    @foreach (var user in AllUsers)
-                    {
-                        <option value="@user.Email">@user.FullName</option>
-                    }
-                </InputSelect>
-                <ValidationMessage For="@(() => OrderModel.ApplicationUserEmail)" />
-            </div>
 
             @foreach (var article in OrderModel.ArticleModels)
             {
@@ -75,7 +77,7 @@
                                 }
                             }
                         </InputSelect>
-                        <ValidationMessage For="@(() => article.Id)" />
+                        <ValidationMessage For="@(() => article.Id)" class="error-message"/>
                     </div>
 
                     <div class="col-md-3">
@@ -84,7 +86,7 @@
                         <ValidationMessage For="@(() => article.Amount)" />
                     </div>
 
-                    <div class="col-md-3 text-end">
+                    <div class="col-md-3 text-center">
                         <button type="button" class="btn btn-danger mt-4" @onclick="@(() => RemoveArticle(article))">Ukloni</button>
                     </div>
                 </div>
@@ -93,7 +95,10 @@
 
             <button type="button" class="btn btn-secondary mb-3" @onclick="AddArticle">Dodaj artikal</button>
             <br /> <br />
-            <button class="btn btn-primary" type="submit">Pošalji narudžbinu</button>
+            <div class="centered mb-4">
+                <button class="btn btn-primary" type="submit">Pošalji narudžbinu</button>
+            </div>
+
         </EditForm>
     </Authorized>
     <NotAuthorized>
@@ -127,6 +132,10 @@
             OrderModel.ArticleModels.Add(new ArticleModelOrder { Amount = 1 });
             AllUsers = await _repo.GetAllUsers(user.Identity.Name);
         }
+        else
+        {
+            _navManager.NavigateTo("/Login");
+        }
     }
     private void AddArticle()
     {
@@ -152,7 +161,7 @@
         if (response)
         {
             // Uspešno promenjeno
-            _navManager.NavigateTo($"/order");
+            _navManager.NavigateTo("/order");
         }
         else
         {
@@ -160,6 +169,9 @@
             message = "Došlo je do greške. Molimo kontaktirajte administratora.";
         }
     }
-
+    private void GoBack()
+    {
+        _navManager.NavigateTo("/Order/");
+    }
 
 }

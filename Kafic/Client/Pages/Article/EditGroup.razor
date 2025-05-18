@@ -33,6 +33,9 @@
                     <button class="btn btn-primary" type="submit">Sačuvaj izmene</button>
                 </div>
             </EditForm>
+            <div class="text-end mt-2">
+                <a href="/group">Nazad</a>
+            </div>
         </div>
     </Authorized>
     <NotAuthorized>
@@ -60,6 +63,10 @@
         if (user.Identity.IsAuthenticated)
         {
             Model = await _repo.GetGroupById(Id);
+        }
+        else
+        {
+            _navManager.NavigateTo("/login");
         }
     }
     private async Task HandleUserGroup()

@@ -32,12 +32,12 @@
                 <div class="form-group row mar-bot">
                     <div class="col-6">
                         <label for="CaffeSeats">Broj stolova</label>
-                        <InputNumber @bind-Value="Model.TablesNo" class="form-control number-input" id="TablesNo" />
+                        <InputNumber @bind-Value="Model.TablesNo" class="form-control number-input" id="TablesNo" min=0/>
                         <ValidationMessage For="@(() => Model.TablesNo)" class="error-message" />
                     </div>
                     <div class="col-6">
                         <label for="CaffeSeats">Broj ležaljki</label>
-                        <InputNumber @bind-Value="Model.SunLoungersNo" class="form-control number-input" id="SunLoungersNo" />
+                        <InputNumber @bind-Value="Model.SunLoungersNo" class="form-control number-input" id="SunLoungersNo" min=0/>
                         <ValidationMessage For="@(() => Model.SunLoungersNo)" class="error-message" />
                     </div>    
                 </div>
@@ -73,6 +73,10 @@
             var userName = user.Identity.Name;
             Model = await _repo.GetCompanyPerEmail(user.Identity.Name);
         }
+        else
+        {
+            _navManager.NavigateTo("/login");
+        }
     }
     private async Task HandleSettingsCompany()
     {
@@ -81,7 +85,8 @@
         if (response)
         {
             // Uspešno promenjeno
-            message = "Promena je uspešno sačuvana.";
+            _navManager.NavigateTo("/order");
+
         }
         else
         {
