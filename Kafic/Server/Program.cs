@@ -14,10 +14,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options
-                .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
+                options             
                 .UseSqlServer(
-                    builder.Configuration.GetConnectionString("DefaultConnection")));
+                    builder.Configuration.GetConnectionString("DefaultConnection"))
+                .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
+                );
 
 // CORS
 builder.Services.AddCors(options =>

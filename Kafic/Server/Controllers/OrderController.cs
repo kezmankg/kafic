@@ -260,31 +260,39 @@ namespace Server.Controllers
                 };
 
                 var orders = await _db.Orders.Where(q => q.CaffeId == user.CaffeId && q.DeskNo == model.DescNo)
-                    .Include(c => c.OrderArticles)
+                    .Include(c => c.OrderArticles).ThenInclude(q => q.Article)
                     .AsSplitQuery()
                     .ToListAsync();
 
                 foreach (var order in orders)
                 {
+                    var orderPaidArticles = order.OrderArticles.Select(oa => new OrderPaidArticle
+                    {
+                        ArticleId = oa.ArticleId,
+                        Amount = oa.Amount,
+                        Discount = oa.Discount,
+                        TotalPrice = oa.Amount * oa.Article.Price * (100 - oa.Discount) / 100,
+                    }).ToList();
+
                     var orderPaid = new OrderPaid
                     {
                         DeskNo = order.DeskNo,
                         Date = order.Date,
                         ApplicationUserEmail = order.ApplicationUserEmail,
-                        OrderArticles = order.OrderArticles.Select(oa => new OrderPaidArticle
-                        {
-                            ArticleId = oa.ArticleId,
-                            Amount = oa.Amount,
-                            Discount = oa.Discount,
-                            //TotalPrice = oa.Amount * oa.Article.Price * (100 - oa.Discount) / 100,
-                        }).ToList(),
+                        OrderArticles = orderPaidArticles,
+                        TotalPrice = orderPaidArticles.Sum(oa => oa.TotalPrice),
                         Bill = bill
                     };
 
                     _db.OrderPaids.Add(orderPaid);
                 }
 
-                _db.Orders.RemoveRange(orders);
+                var orders1 = await _db.Orders.Where(q => q.CaffeId == user.CaffeId && q.DeskNo == model.DescNo).ToListAsync();
+                foreach (var order in orders1)
+                {
+                    _db.Orders.Remove(order);
+                }
+                
 
                 var changes = await _db.SaveChangesAsync();
 
