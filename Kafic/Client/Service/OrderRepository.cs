@@ -107,6 +107,15 @@ namespace Client.Service
             return response.IsSuccessStatusCode;
         }
 
+        public async Task<IList<ArticleModelOrder>> GetAllArticles(string email, string deskno)
+        {
+            _client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("bearer", await GetBearerToken());
+
+            var reponse = await _client.GetFromJsonAsync<IList<ArticleModelOrder>>(Endpoints.GetAllOrderArticlesEndpoint + email + "/" + deskno);
+            return reponse;
+        }
+
         private async Task<string> GetBearerToken()
         {
             return await _localStorage.GetItemAsync<string>("authToken");

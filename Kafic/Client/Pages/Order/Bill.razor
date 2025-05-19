@@ -1,0 +1,99 @@
+﻿@page "/bill/{DeskNo}"
+@using Blazored.Toast.Services
+@using Client.Contracts
+@using Client.Static
+@using Share.Models
+
+@inject IOrderRepository _repo
+@inject NavigationManager _navManager
+@inject IToastService _toastService
+
+
+<AuthorizeView>
+    <Authorized>
+        <div class="">
+            <button class="btn btn-secondary" style="float: right;" @onclick="() => GoBack()">Nazad</button>
+            <h3>Račun za @DeskNo</h3>
+            <hr />
+            <div class="error-message centered">
+                @if (!string.IsNullOrWhiteSpace(message))
+                {
+                    @message
+                }
+            </div>
+            
+            <table class="table table-hover table-bordered">
+                <thead class="table-active">
+                    <tr>
+                        <th>Porudžbina</th>
+                        <th>Količina</th>
+                        <th>Cena</th>
+                        <th>Popust</th>
+                        <th>Ukupno</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var article in AllArticles)
+                    {
+                        <tr>
+                            <td>@article.Name</td>
+                            <td>@article.Amount</td>
+                            <td>@article.Price.ToString("F2") €</td>
+                            <td>@article.Discount %</td>
+                            <td>@article.TotalPrice €</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <span class="me-4">Popust: @discountModel.DiscountPercentage % </span> <br />
+            <span class="me-4">Ukupno: <b>@totalSum.ToString("F2") € </b> </span>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <p>Nemate pristup ovoj stranici.</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+
+@code {
+    private IList<ArticleModelOrder> AllArticles = new List<ArticleModelOrder>();
+    private DiscountModel discountModel = new DiscountModel();
+    private bool isSuccess = true;
+    private string? message;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    [Parameter]
+    public String DeskNo { get; set; } = string.Empty;
+    private String userEmail { get; set; } = string.Empty;
+    private double totalSum { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            userEmail = user.Identity.Name;
+            AllArticles = await _repo.GetAllArticles(user.Identity.Name, DeskNo);
+            discountModel = await _repo.GetDiscount(userEmail, DeskNo);
+            totalSum = AllArticles.Sum(o => o.TotalPrice) * (100 - discountModel.DiscountPercentage) / 100;
+        }
+        else
+        {
+            _navManager.NavigateTo($"/Login");
+        }
+    }
+    
+    private void GoBack()
+    {
+        _navManager.NavigateTo($"/editorder/{DeskNo}");
+    }
+
+    
+
+}
+

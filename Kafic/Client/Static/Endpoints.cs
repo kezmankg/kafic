@@ -42,5 +42,6 @@
         public static string UpdateDiscountEndpoint = $"{BaseUrl}api/order/updateDiscount/";
         public static string GetDiscountEndpoint = $"{BaseUrl}api/order/getDiscount/";
         public static string UpdateBillDiscountEndpoint = $"{BaseUrl}api/order/updateDiscountOnBill/";
+        public static string GetAllOrderArticlesEndpoint = $"{BaseUrl}api/order/getAllArticles/";
     }
 }

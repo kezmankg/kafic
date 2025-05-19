@@ -445,5 +445,43 @@ namespace Server.Controllers
                 return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
             }
         }
+
+        [HttpGet("getAllArticles/{email}/{deskno}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetAllArticles(string email, string deskno)
+        {
+            var location = GetControllerActionNames();
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user == null)
+                {
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                        "user ne postoji");
+                }
+
+                var result = await _db.OrderArticles
+                    .Include(q => q.Order)
+                    .Include(q => q.Article)
+                    .Where(oa => oa.Order.CaffeId == user.CaffeId && oa.Order.DeskNo == deskno)
+                    .GroupBy(oa => new { oa.ArticleId, oa.Article.Name, oa.Article.Price, oa.Discount })
+                    .Select(g => new ArticleModelOrder
+                    {
+                        Name = g.Key.Name,
+                        Amount = g.Sum(x => x.Amount),
+                        Price = g.Key.Price,
+                        Discount = g.Key.Discount
+                    })
+                    .ToListAsync();
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
+            }
+
+        }
     }
 }

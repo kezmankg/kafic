@@ -12,6 +12,7 @@ namespace Client.Contracts
         public Task<bool> UpdateDiscount(ArticleDiscountModelOrder model);
         public Task<DiscountModel> GetDiscount(string email, string deskno);
         public Task<bool> UpdateDiscountOnBill(DiscountModel model);
+        public Task<IList<ArticleModelOrder>> GetAllArticles(string email, string deskno);
 
     }
 }

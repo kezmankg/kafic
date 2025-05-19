@@ -95,6 +95,9 @@
             </div>
             <div class="centered mb-4">               
                 <span class="me-4">Ukupna cena računa: @totalSum.ToString("F2") € </span>
+                <button class="btn btn-primary" @onclick="() => ShowBill(DeskNo)">Prikaz računa</button>
+            </div>
+            <div class="centered mb-4">
                 <button class="btn btn-primary" @onclick="() => PayOrder(DeskNo, userEmail)">Plaćanje</button>
             </div>
         </div>
@@ -232,6 +235,11 @@
         {
             message = "Došlo je do greške, molimo kontaktirajte administratora.";
         }
+    }
+
+    private async Task ShowBill(string descNo)
+    {
+        _navManager.NavigateTo($"/bill/{descNo}");
     }
 
 }
