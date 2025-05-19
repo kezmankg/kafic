@@ -22,30 +22,31 @@
                 }
             </div>
             
-            <table class="table table-hover table-bordered">
-                <thead class="table-active">
-                    <tr>
-                        <th>Porudžbina</th>
-                        <th>Količina</th>
-                        <th>Cena</th>
-                        <th>Popust</th>
-                        <th>Ukupno</th>
-
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var article in AllArticles)
-                    {
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered">
+                    <thead class="table-active">
                         <tr>
-                            <td>@article.Name</td>
-                            <td>@article.Amount</td>
-                            <td>@article.Price.ToString("F2") €</td>
-                            <td>@article.Discount %</td>
-                            <td>@article.TotalPrice €</td>
+                            <th>Porudžbina</th>
+                            <th>Količina</th>
+                            <th>Cena</th>
+                            <th>Popust</th>
+                            <th>Ukupno</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach (var article in AllArticles)
+                        {
+                            <tr>
+                                <td>@article.Name</td>
+                                <td>@article.Amount</td>
+                                <td>@article.Price.ToString("F2") €</td>
+                                <td>@article.Discount %</td>
+                                <td>@article.TotalPrice €</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
             <span class="me-4">Popust: @discountModel.DiscountPercentage % </span> <br />
             <span class="me-4">Ukupno: <b>@totalSum.ToString("F2") € </b> </span>
         </div>

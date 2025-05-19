@@ -75,29 +75,30 @@
                     @foreach (var subgroup in group.Subgroups)
                     {
                         <h6><b>@subgroup.Name</b></h6>
-
-                        <table class="table table-hover table-bordered">
-                            <thead class="table-active">
-                                <tr>
-                                    <th>Ime</th>
-                                    <th>Cena</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var article in subgroup.Articles)
-                                {
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered">
+                                <thead class="table-active">
                                     <tr>
-                                        <td>@article.Name</td>
-                                        <td>@article.Price.ToString("F2")€</td>
-                                        <td class="text-center">
-                                            <a class="icon-btn" @onclick="@(() => Edit(article.Id))">✏️</a>
-                                            <a class="icon-btn " @onclick="@(() => Delete(article.Id))">🗑️</a>
-                                        </td>
+                                        <th>Ime</th>
+                                        <th>Cena</th>
+                                        <th></th>
                                     </tr>
-                                }
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @foreach (var article in subgroup.Articles)
+                                    {
+                                        <tr>
+                                            <td>@article.Name</td>
+                                            <td>@article.Price.ToString("F2")€</td>
+                                            <td class="text-center">
+                                                <a class="icon-btn" @onclick="@(() => Edit(article.Id))">✏️</a>
+                                                <a class="icon-btn " @onclick="@(() => Delete(article.Id))">🗑️</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
                     }
                 }
             </div>

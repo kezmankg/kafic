@@ -180,3 +180,8 @@ code {
     .number-box:hover {
         background-color: #dcdcdc;
     }
+@media (max-width: 767.98px) {
+    .login-form {
+        width: 300px;
+    }
+}

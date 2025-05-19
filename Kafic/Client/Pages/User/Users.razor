@@ -54,33 +54,36 @@
             <div class="col-md-9 border-end">
                 <h2>Konobari</h2>      
                 <br />
-                <table class="table table-hover table-bordered">
-                    <thead class="table-active">
-                        <tr>
-                            <th>Ime</th>
-                            <th>Email</th>
-                            <th>Telefon</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var user in AllUsers)
-                        {
+                <div class="table-responsive"> 
+                    <table class="table table-hover table-bordered">
+                        <thead class="table-active">
                             <tr>
-                                <td>@user.FullName</td>
-                                <td>@user.Email</td>
-                                <td>@user.PhoneNumber</td>
-                                <td class="text-center">
-                                    <a class="icon-btn" @onclick="@(() => EditUser(user.Id))">✏️</a>
-                                    @if (!user.Email.ToLower().Equals(userEmail.ToLower()))
-                                    {
-                                        <a class="icon-btn " @onclick="@(() => DeleteUser(user.Id))">🗑️</a>
-                                    }
-                                </td>
+                                <th>Ime</th>
+                                <th>Email</th>
+                                <th>Telefon</th>
+                                <th></th>
                             </tr>
-                        }
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in AllUsers)
+                            {
+                                <tr>
+                                    <td>@user.FullName</td>
+                                    <td>@user.Email</td>
+                                    <td>@user.PhoneNumber</td>
+                                    <td class="text-center">
+                                        <a class="icon-btn" @onclick="@(() => EditUser(user.Id))">✏️</a>
+                                        @if (!user.Email.ToLower().Equals(userEmail.ToLower()))
+                                        {
+                                            <a class="icon-btn " @onclick="@(() => DeleteUser(user.Id))">🗑️</a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                
             </div>
         </div>
     </Authorized>

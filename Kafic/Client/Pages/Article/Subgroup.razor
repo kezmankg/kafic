@@ -53,32 +53,33 @@
                 <div class="col-md-9 border-end">
                     <br>  
                     <h3>Lista svih pogrupa</h3>
-
-                    <table class="table table-hover table-bordered">
-                        <thead class="table-active">
-                            <tr>
-                                <th>Grupa</th>
-                                <th>Podgrupa</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var group in AllGroupsWithSubgroups)
-                            {
-                                @foreach (var subgroup in group.Subgroups)
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered">
+                            <thead class="table-active">
+                                <tr>
+                                    <th>Grupa</th>
+                                    <th>Podgrupa</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var group in AllGroupsWithSubgroups)
                                 {
-                                    <tr>
-                                        <td>@group.Name</td>
-                                        <td>@subgroup.Name</td>
-                                        <td class="text-center">
-                                            <a class="icon-btn" @onclick="@(() => Edit(subgroup.Id))">✏️</a>
-                                            <a class="icon-btn" @onclick="@(() => Delete(subgroup.Id))">🗑️</a>
-                                        </td>
-                                    </tr>
+                                    @foreach (var subgroup in group.Subgroups)
+                                    {
+                                        <tr>
+                                            <td>@group.Name</td>
+                                            <td>@subgroup.Name</td>
+                                            <td class="text-center">
+                                                <a class="icon-btn" @onclick="@(() => Edit(subgroup.Id))">✏️</a>
+                                                <a class="icon-btn" @onclick="@(() => Delete(subgroup.Id))">🗑️</a>
+                                            </td>
+                                        </tr>
+                                    }
                                 }
-                            }
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>   

@@ -42,26 +42,29 @@
             <div class="col-md-9 border-end" >
                 <br />
                 <h3>List svih grupa</h3>
-                <table class="table table-hover table-bordered">
-                    <thead class="table-active">
-                        <tr>
-                            <th>Ime grupe</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var group in AllGroups)
-                        {
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered">
+                        <thead class="table-active">
                             <tr>
-                                <td>@group.Name</td>
-                                <td class="text-center">
-                                    <a class="icon-btn" @onclick="@(() => Edit(group.Id))">✏️</a>
-                                    <a class="icon-btn" @onclick="@(() => Delete(group.Id))">🗑️</a>
-                                </td>
+                                <th>Ime grupe</th>
+                                <th></th>
                             </tr>
-                        }
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach (var group in AllGroups)
+                            {
+                                <tr>
+                                    <td>@group.Name</td>
+                                    <td class="text-center">
+                                        <a class="icon-btn" @onclick="@(() => Edit(group.Id))">✏️</a>
+                                        <a class="icon-btn" @onclick="@(() => Delete(group.Id))">🗑️</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                
             </div>            
         </div>
     </Authorized>

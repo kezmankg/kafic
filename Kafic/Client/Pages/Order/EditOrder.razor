@@ -26,52 +26,54 @@
             }
             @foreach (var order in AllOrders)
             {
-                <div>
+                <div >
                     <p>Porudžbina @iterator - @order.Date - @order.ApplicationUserEmail</p>
-                    <table class="table table-hover table-bordered">
-                        <thead class="table-active">
-                            <tr>
-                                <th>Porudžbina</th>
-                                <th>Količina</th>
-                                <th>Cena</th>
-                                @if (isAdmin)
-                                {
-                                    <th>Popust (%)</th>
-                                }
-                                <th>Ukupno</th>
-                                <th></th>
-                                
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var article in order.ArticleModels)
-                            {
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered">
+                            <thead class="table-active">
                                 <tr>
-                                    <td>@article.Name</td>
-                                    <td>@article.Amount</td>
-                                    <td>@article.Price.ToString("F2") €</td>
+                                    <th>Porudžbina</th>
+                                    <th>Količina</th>
+                                    <th>Cena</th>
                                     @if (isAdmin)
                                     {
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <input type="number" min="0" max="100" class="form-control form-control-sm" style="width: 70px;"
-                                                       @bind="@article.Discount" />
-                                                <button class="btn btn-sm btn-success ms-2"
-                                                        @onclick="() => ApplyDiscount(order.Id, article.Id, article.Discount)">
-                                                    Primeni
-                                                </button>
-                                            </div>
-                                        </td>
+                                        <th>Popust (%)</th>
                                     }
-                                    <td>@article.TotalPrice €</td>
-                                    <td class="text-center">
-                                        <a class="icon-btn" @onclick="@(() => RemoveArticle(order.Id, article.Id))">🗑️</a>
-                                    </td>
-                                    
+                                    <th>Ukupno</th>
+                                    <th></th>
+                                
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach (var article in order.ArticleModels)
+                                {
+                                    <tr>
+                                        <td>@article.Name</td>
+                                        <td>@article.Amount</td>
+                                        <td>@article.Price.ToString("F2") €</td>
+                                        @if (isAdmin)
+                                        {
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <input type="number" min="0" max="100" class="form-control form-control-sm" style="width: 70px;"
+                                                           @bind="@article.Discount" />
+                                                    <button class="btn btn-sm btn-success ms-2"
+                                                            @onclick="() => ApplyDiscount(order.Id, article.Id, article.Discount)">
+                                                        Primeni
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        }
+                                        <td>@article.TotalPrice €</td>
+                                        <td class="text-center">
+                                            <a class="icon-btn" @onclick="@(() => RemoveArticle(order.Id, article.Id))">🗑️</a>
+                                        </td>
+                                    
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                     <p class="text-end me-4">Ukupan iznos porudžbine : @order.TotalOrderPrice.ToString("F2") €</p>
                     @if (isAdmin)
                     {
