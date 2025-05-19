@@ -34,12 +34,13 @@
                                 <th>Porudžbina</th>
                                 <th>Količina</th>
                                 <th>Cena</th>
-                                <th>Ukupno</th>
-                                <th></th>
                                 @if (isAdmin)
                                 {
                                     <th>Popust (%)</th>
                                 }
+                                <th>Ukupno</th>
+                                <th></th>
+                                
                             </tr>
                         </thead>
                         <tbody>
@@ -48,11 +49,7 @@
                                 <tr>
                                     <td>@article.Name</td>
                                     <td>@article.Amount</td>
-                                    <td>@article.Price €</td>
-                                    <td>@article.TotalPrice €</td>
-                                    <td class="text-center">
-                                        <a class="icon-btn" @onclick="@(() => RemoveArticle(order.Id, article.Id))">🗑️</a>
-                                    </td>
+                                    <td>@article.Price.ToString("F2") €</td>
                                     @if (isAdmin)
                                     {
                                         <td>
@@ -66,11 +63,16 @@
                                             </div>
                                         </td>
                                     }
+                                    <td>@article.TotalPrice €</td>
+                                    <td class="text-center">
+                                        <a class="icon-btn" @onclick="@(() => RemoveArticle(order.Id, article.Id))">🗑️</a>
+                                    </td>
+                                    
                                 </tr>
                             }
                         </tbody>
                     </table>
-                    <p class="text-end me-4">Ukupan iznos porudžbine : @order.TotalOrderPrice €</p>
+                    <p class="text-end me-4">Ukupan iznos porudžbine : @order.TotalOrderPrice.ToString("F2") €</p>
                     @if (isAdmin)
                     {
                         <div class="centered">
@@ -83,7 +85,7 @@
             }
             <hr />
             <div class="centered mb-4">
-                <span class="me-4">Ukupna cena računa: @totalSum €</span>
+                <span class="me-4">Ukupna cena računa: @totalSum.ToString("F2") € </span>
                 <button class="btn btn-primary" @onclick="() => PayOrder(DeskNo, userEmail)">Plaćanje</button>
             </div>
         </div>

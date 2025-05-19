@@ -108,7 +108,7 @@ namespace Server.Controllers
         [HttpGet("getAllOrders/{email}/{deskno}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetTeamCategoriesTenant(string email, string deskno)
+        public async Task<IActionResult> GetAllOrders(string email, string deskno)
         {
             var location = GetControllerActionNames();
             try
@@ -138,7 +138,8 @@ namespace Server.Controllers
                         Id = oa.ArticleId,       
                         Amount = oa.Amount,
                         Name = oa.Article.Name,
-                        Price = oa.Article.Price
+                        Price = oa.Article.Price,
+                        Discount = oa.Discount
                     }).ToList()
                 }).ToList();
 
@@ -316,6 +317,18 @@ namespace Server.Controllers
             var location = GetControllerActionNames();
             try
             {
+                var user = await _userManager.FindByEmailAsync(model.UserEmail);
+                if (user == null)
+                {
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                        "user ne postoji");
+                }
+                var orderArticles = await _db.OrderArticles
+                    .Where(oa => oa.ArticleId == model.ArticleId &&
+                                 oa.Order.CaffeId == user.CaffeId &&
+                                 oa.Order.DeskNo == model.DeskNo)
+                    .Include(oa => oa.Order)
+                    .ToListAsync();
                 //var group = await _db.Groups.FirstOrDefaultAsync(q => q.Id == model.Id);
                 //if (group == null)
                 //{
@@ -326,6 +339,13 @@ namespace Server.Controllers
                 //group.Name = model.Name;
 
                 //_db.Groups.Update(group);
+
+                foreach (var orderArticle in orderArticles)
+                {
+                    orderArticle.Discount = model.Discount;
+                }
+
+                _db.OrderArticles.UpdateRange(orderArticles);
 
                 var changes = await _db.SaveChangesAsync();
 

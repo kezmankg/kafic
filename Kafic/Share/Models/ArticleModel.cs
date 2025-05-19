@@ -30,7 +30,7 @@ namespace Share.Models
         public string Name { get; set; } = string.Empty;
         public double Price { get; set; }
 
-        public double TotalPrice => Amount * Price;
+        public double TotalPrice => Amount * Price * (100 - Discount) / 100;
         public double Discount { get; set; }
     }
 

@@ -89,7 +89,7 @@
                                 {
                                     <tr>
                                         <td>@article.Name</td>
-                                        <td>@article.Price</td>
+                                        <td>@article.Price.ToString("F2")€</td>
                                         <td class="text-center">
                                             <a class="icon-btn" @onclick="@(() => Edit(article.Id))">✏️</a>
                                             <a class="icon-btn " @onclick="@(() => Delete(article.Id))">🗑️</a>
