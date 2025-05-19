@@ -12,7 +12,6 @@ namespace Server.Data
         public virtual IList<ApplicationUser> ApplicationUsers { get; set; } = new List<ApplicationUser>();
         public virtual IList<Group> Groups { get; set; } = new List<Group>();
         public virtual IList<Order> Orders { get; set; } = new List<Order>();
-        public virtual IList<OrderPaid> OrderPaids { get; set; } = new List<OrderPaid>();
         public virtual IList<Bill> Bills { get; set; } = new List<Bill>();
     }
 }

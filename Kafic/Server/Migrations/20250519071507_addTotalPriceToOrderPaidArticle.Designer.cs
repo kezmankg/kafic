@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Server.Data;
 
@@ -11,9 +12,11 @@ using Server.Data;
 namespace Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250519071507_addTotalPriceToOrderPaidArticle")]
+    partial class addTotalPriceToOrderPaidArticle
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -251,7 +254,7 @@ namespace Server.Migrations
 
                     b.HasIndex("SubgroupId");
 
-                    b.ToTable("Articles", (string)null);
+                    b.ToTable("Articles");
                 });
 
             modelBuilder.Entity("Server.Data.Bill", b =>
@@ -275,7 +278,7 @@ namespace Server.Migrations
 
                     b.HasIndex("CaffeId");
 
-                    b.ToTable("Bills", (string)null);
+                    b.ToTable("Bills");
                 });
 
             modelBuilder.Entity("Server.Data.Caffe", b =>
@@ -298,7 +301,7 @@ namespace Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Caffes", (string)null);
+                    b.ToTable("Caffes");
                 });
 
             modelBuilder.Entity("Server.Data.Group", b =>
@@ -320,7 +323,7 @@ namespace Server.Migrations
 
                     b.HasIndex("CaffeId");
 
-                    b.ToTable("Groups", (string)null);
+                    b.ToTable("Groups");
                 });
 
             modelBuilder.Entity("Server.Data.Logger", b =>
@@ -353,7 +356,7 @@ namespace Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Loggers", (string)null);
+                    b.ToTable("Loggers");
                 });
 
             modelBuilder.Entity("Server.Data.Order", b =>
@@ -380,7 +383,7 @@ namespace Server.Migrations
 
                     b.HasIndex("CaffeId");
 
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("Server.Data.OrderArticle", b =>
@@ -401,7 +404,7 @@ namespace Server.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("OrderArticles", (string)null);
+                    b.ToTable("OrderArticles");
                 });
 
             modelBuilder.Entity("Server.Data.OrderPaid", b =>
@@ -431,7 +434,7 @@ namespace Server.Migrations
 
                     b.HasIndex("BillId");
 
-                    b.ToTable("OrderPaids", (string)null);
+                    b.ToTable("OrderPaids");
                 });
 
             modelBuilder.Entity("Server.Data.OrderPaidArticle", b =>
@@ -455,7 +458,7 @@ namespace Server.Migrations
 
                     b.HasIndex("OrderPaidId");
 
-                    b.ToTable("OrderPaidArticles", (string)null);
+                    b.ToTable("OrderPaidArticles");
                 });
 
             modelBuilder.Entity("Server.Data.Subgroup", b =>
@@ -477,7 +480,7 @@ namespace Server.Migrations
 
                     b.HasIndex("GroupId");
 
-                    b.ToTable("Subgroups", (string)null);
+                    b.ToTable("Subgroups");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

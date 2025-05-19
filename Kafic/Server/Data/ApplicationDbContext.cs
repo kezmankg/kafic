@@ -41,7 +41,7 @@ namespace Server.Data
 
             modelBuilder.Entity<OrderPaid>()
                 .HasOne(op => op.Bill)
-                .WithMany()
+                .WithMany(b => b.OrderPaids)
                 .HasForeignKey(op => op.BillId)
                 .OnDelete(DeleteBehavior.Restrict); // Or DeleteBehavior.NoAction
         }

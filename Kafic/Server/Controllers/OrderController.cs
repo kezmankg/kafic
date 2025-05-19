@@ -269,13 +269,14 @@ namespace Server.Controllers
                     var orderPaid = new OrderPaid
                     {
                         DeskNo = order.DeskNo,
-                        CaffeId = order.CaffeId,
                         Date = order.Date,
                         ApplicationUserEmail = order.ApplicationUserEmail,
                         OrderArticles = order.OrderArticles.Select(oa => new OrderPaidArticle
                         {
                             ArticleId = oa.ArticleId,
                             Amount = oa.Amount,
+                            Discount = oa.Discount,
+                            //TotalPrice = oa.Amount * oa.Article.Price * (100 - oa.Discount) / 100,
                         }).ToList(),
                         Bill = bill
                     };
@@ -329,16 +330,6 @@ namespace Server.Controllers
                                  oa.Order.DeskNo == model.DeskNo)
                     .Include(oa => oa.Order)
                     .ToListAsync();
-                //var group = await _db.Groups.FirstOrDefaultAsync(q => q.Id == model.Id);
-                //if (group == null)
-                //{
-                //    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
-                //        "grupa ne postoji");
-                //}
-
-                //group.Name = model.Name;
-
-                //_db.Groups.Update(group);
 
                 foreach (var orderArticle in orderArticles)
                 {
