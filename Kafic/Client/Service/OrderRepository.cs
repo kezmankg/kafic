@@ -91,6 +91,22 @@ namespace Client.Service
             return response.IsSuccessStatusCode;
         }
 
+        public async Task<DiscountModel> GetDiscount(string email, string deskno)
+        {
+            _client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("bearer", await GetBearerToken());
+
+            var reponse = await _client.GetFromJsonAsync<DiscountModel>(Endpoints.GetDiscountEndpoint + email + "/" + deskno);
+            return reponse;
+        }
+        public async Task<bool> UpdateDiscountOnBill(DiscountModel model)
+        {
+            _client.DefaultRequestHeaders.Authorization =
+               new AuthenticationHeaderValue("bearer", await GetBearerToken());
+            var response = await _client.PutAsJsonAsync(Endpoints.UpdateBillDiscountEndpoint, model);
+            return response.IsSuccessStatusCode;
+        }
+
         private async Task<string> GetBearerToken()
         {
             return await _localStorage.GetItemAsync<string>("authToken");

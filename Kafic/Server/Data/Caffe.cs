@@ -13,5 +13,6 @@ namespace Server.Data
         public virtual IList<Group> Groups { get; set; } = new List<Group>();
         public virtual IList<Order> Orders { get; set; } = new List<Order>();
         public virtual IList<Bill> Bills { get; set; } = new List<Bill>();
+        public virtual IList<Discount> Discounts { get; set; } = new List<Discount>();
     }
 }

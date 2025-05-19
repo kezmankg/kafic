@@ -259,6 +259,14 @@ namespace Server.Controllers
                     OrderPaids = new List<OrderPaid>() 
                 };
 
+                var discount = await _db.Discounts.FirstOrDefaultAsync(q => q.CaffeId == user.CaffeId && q.DeskNo == model.DescNo);
+
+                if (discount != null)
+                {
+                    bill.Discount = discount.DiscountPercentage;
+                    _db.Discounts.Remove(discount);
+                }
+
                 var orders = await _db.Orders.Where(q => q.CaffeId == user.CaffeId && q.DeskNo == model.DescNo)
                     .Include(c => c.OrderArticles).ThenInclude(q => q.Article)
                     .AsSplitQuery()
@@ -292,7 +300,6 @@ namespace Server.Controllers
                 {
                     _db.Orders.Remove(order);
                 }
-                
 
                 var changes = await _db.SaveChangesAsync();
 
@@ -356,6 +363,81 @@ namespace Server.Controllers
                 {
                     return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
                         "update group-a");
+                }
+            }
+            catch (Exception e)
+            {
+                return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
+            }
+        }
+
+        [HttpGet("getDiscount/{email}/{deskno}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetDiscount(string email, string deskno)
+        {
+            var location = GetControllerActionNames();
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user == null)
+                {
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                        "user ne postoji");
+                }
+
+                var discount = await _db.Discounts.FirstOrDefaultAsync(q => q.CaffeId == user.CaffeId && q.DeskNo == deskno);
+
+                if(discount == null)
+                {
+                    discount = new Discount();
+                }
+                var response = _mapper.Map<DiscountModel>(discount);
+                return Ok(response);
+            }
+            catch (Exception e)
+            {
+                return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
+            }
+
+        }
+
+        [Route("updateDiscountOnBill")]
+        [HttpPut]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UpdateBillDiscount(DiscountModel model)
+        {
+            var location = GetControllerActionNames();
+            try
+            {
+                
+                var discount = _mapper.Map<Discount>(model);
+
+                if (model.Id == 0)
+                {
+                    var user = await _userManager.FindByEmailAsync(model.UserEmail);
+                    if (user == null)
+                    {
+                        return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                            "user ne postoji");
+                    }
+                    discount.CaffeId = (int)user.CaffeId;
+                }
+
+                _db.Discounts.Update(discount);
+
+                var changes = await _db.SaveChangesAsync();
+
+                if (changes > 0)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                        "update discounta");
                 }
             }
             catch (Exception e)

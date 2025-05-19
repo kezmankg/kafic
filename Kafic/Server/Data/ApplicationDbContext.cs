@@ -15,6 +15,7 @@ namespace Server.Data
         public DbSet<OrderPaidArticle> OrderPaidArticles { get; set; }
         public DbSet<Bill> Bills { get; set; }
         public DbSet<OrderArticle> OrderArticles { get; set; }
+        public DbSet<Discount> Discounts { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)

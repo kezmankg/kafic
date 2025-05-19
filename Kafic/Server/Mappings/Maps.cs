@@ -17,6 +17,7 @@ namespace Server.Mappings
             CreateMap<Order, OrderModel>().ReverseMap();
             CreateMap<Order, OrderPaid>().ReverseMap();
             CreateMap<OrderArticle, OrderPaidArticle>().ReverseMap();
+            CreateMap<Discount, DiscountModel>().ReverseMap();
         }
     }
 }

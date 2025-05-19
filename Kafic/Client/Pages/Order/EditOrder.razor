@@ -84,7 +84,16 @@
                 iterator++;                                                                 
             }
             <hr />
-            <div class="centered mb-4">
+            <div class="d-flex justify-content-center align-items-center mb-4">
+                Popust na račun (%):
+                <input type="number" min="0" max="100" class="form-control form-control-sm" style="width: 70px;"
+                       @bind="@discountModel.DiscountPercentage" />
+                <button class="btn btn-sm btn-success ms-2"
+                        @onclick="() => ApplyDiscountOnBIll()">
+                    Primeni
+                </button>
+            </div>
+            <div class="centered mb-4">               
                 <span class="me-4">Ukupna cena računa: @totalSum.ToString("F2") € </span>
                 <button class="btn btn-primary" @onclick="() => PayOrder(DeskNo, userEmail)">Plaćanje</button>
             </div>
@@ -98,6 +107,7 @@
 
 @code {
     private IList<OrderModel> AllOrders = new List<OrderModel>();
+    private DiscountModel discountModel = new DiscountModel();
     private bool isSuccess = true;
     private string? message;
 
@@ -120,7 +130,8 @@
             isAdmin = user.IsInRole("Administrator");
             userEmail = user.Identity.Name;
             AllOrders = await _repo.GetAllOrder(user.Identity.Name, DeskNo);
-            totalSum = AllOrders.Sum(o => o.TotalOrderPrice);
+            discountModel = await _repo.GetDiscount(userEmail, DeskNo);
+            totalSum = AllOrders.Sum(o => o.TotalOrderPrice) * (100 - discountModel.DiscountPercentage) / 100;
         }
         else
         {
@@ -134,7 +145,7 @@
         {
             message = "";
             AllOrders = await _repo.GetAllOrder(userEmail, DeskNo);
-            totalSum = AllOrders.Sum(o => o.TotalOrderPrice);
+            totalSum = AllOrders.Sum(o => o.TotalOrderPrice) * (100 - discountModel.DiscountPercentage) / 100;
 
         }
         else
@@ -149,7 +160,7 @@
         {
             message = "";
             AllOrders = await _repo.GetAllOrder(userEmail, DeskNo);
-            totalSum = AllOrders.Sum(o => o.TotalOrderPrice);
+            totalSum = AllOrders.Sum(o => o.TotalOrderPrice) * (100 - discountModel.DiscountPercentage) / 100;
 
         }
         else
@@ -192,7 +203,29 @@
         {
             message = "";
             AllOrders = await _repo.GetAllOrder(userEmail, DeskNo);
-            totalSum = AllOrders.Sum(o => o.TotalOrderPrice);
+            totalSum = AllOrders.Sum(o => o.TotalOrderPrice) * (100 - discountModel.DiscountPercentage) / 100;
+
+        }
+        else
+        {
+            message = "Došlo je do greške, molimo kontaktirajte administratora.";
+        }
+    }
+
+    private async Task ApplyDiscountOnBIll()
+    {
+        if (discountModel.Id == 0)
+        {
+            discountModel.UserEmail = userEmail;
+            discountModel.DeskNo = DeskNo;
+        }
+        var result = await _repo.UpdateDiscountOnBill(discountModel);
+        if (result)
+        {
+            message = "";
+            AllOrders = await _repo.GetAllOrder(userEmail, DeskNo);
+            discountModel = await _repo.GetDiscount(userEmail, DeskNo);
+            totalSum = AllOrders.Sum(o => o.TotalOrderPrice) * (100 - discountModel.DiscountPercentage) / 100;
 
         }
         else

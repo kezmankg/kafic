@@ -10,6 +10,8 @@ namespace Client.Contracts
         public Task<bool> DeleteArticle(int idOrder, int idArticle);
         public Task<bool> PayOrder(string descNo, string userEmail, double totalSum);
         public Task<bool> UpdateDiscount(ArticleDiscountModelOrder model);
+        public Task<DiscountModel> GetDiscount(string email, string deskno);
+        public Task<bool> UpdateDiscountOnBill(DiscountModel model);
 
     }
 }
