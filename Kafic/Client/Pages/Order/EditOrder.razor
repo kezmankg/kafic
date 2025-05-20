@@ -143,38 +143,17 @@
             _navManager.NavigateTo($"/Login");
         }
     }
-    private async Task RemoveOrder(int id)
+    private void RemoveOrder(int id)
     {
-        var result = await _repo.DeleteOrder(id);
-        if (result)
-        {
-            message = "";
-            AllOrders = await _repo.GetAllOrder(userEmail, DeskNo);
-            totalSum = AllOrders.Sum(o => o.TotalOrderPrice) * (100 - discountModel.DiscountPercentage) / 100;
-
-        }
-        else
-        {
-            message = "Došlo je do greške, molimo kontaktirajte administratora.";
-        }
+        _navManager.NavigateTo($"/Delete/5/{id}/{DeskNo}");
     }
-    private async Task RemoveArticle(int idOrder, int idArticle)
+    private void RemoveArticle(int idOrder, int idArticle)
     {
-        var result = await _repo.DeleteArticle(idOrder, idArticle);
-        if (result)
-        {
-            message = "";
-            AllOrders = await _repo.GetAllOrder(userEmail, DeskNo);
-            totalSum = AllOrders.Sum(o => o.TotalOrderPrice) * (100 - discountModel.DiscountPercentage) / 100;
-
-        }
-        else
-        {
-            message = "Došlo je do greške, molimo kontaktirajte administratora.";
-        }
+        _navManager.NavigateTo($"/Delete/6/{idOrder}/{DeskNo}/{idArticle}");
     }
     private async Task PayOrder(string descNo, string userEmail)
     {
+        // mozda ako totalSum je nula da se ne salje ovde request ??
         var response = await _repo.PayOrder(descNo, userEmail, totalSum);
 
         if (response)
