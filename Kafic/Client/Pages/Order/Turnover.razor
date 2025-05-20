@@ -23,7 +23,19 @@
             </div>
 
             <button class="btn btn-primary" @onclick="HandleCurrentDay">Danasnji promet</button>
-            
+            <br /><br />
+            Promet za odredjeni period
+            <EditForm Model="@dateRange" OnValidSubmit="HandleDateRangeSubmit" Context="EditForm1">
+                <div class="form-group">
+                    <label>Datum od:</label>
+                    <InputDate @bind-Value="dateRange.DateFrom" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Datum do:</label>
+                    <InputDate @bind-Value="dateRange.DateTo" class="form-control" />
+                </div>
+                <button type="submit" class="btn btn-primary">Prikaži promet</button>
+            </EditForm>
 
             @messageFouUser
         </div>
@@ -41,6 +53,11 @@
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
 
+    TurnoverModel dateRange = new()
+        {
+            DateFrom = DateTime.Today,
+            DateTo = DateTime.Today
+        };
     private String userEmail { get; set; } = string.Empty;
     private double totalSum { get; set; }
 
@@ -64,10 +81,31 @@
         _navManager.NavigateTo($"/order/");
     }
 
+    private async Task HandleDateRangeSubmit()
+    {
+        message = "";
+        messageFouUser = "";
+        var response = await _repo.GetTurnover(dateRange.DateFrom, dateRange.DateTo, userEmail);
+
+        if (response != null)
+        {
+            // Uspešno promenjeno
+            messageFouUser = "Promet od datuma: " 
+            + response.DateFrom.ToString("dd.MM.yyyy") + " do datuma: " 
+            + response.DateTo.ToString("dd.MM.yyyy") + " je: " + response.TotalSum.ToString("F2") + " €";
+        }
+        else
+        {
+            // Prikaz poruke o grešci
+            message = "Došlo je do greške. Molimo kontaktirajte administratora.";
+        }
+    }
+
     private async Task HandleCurrentDay()
     {
         message = "";
         messageFouUser = "";
+
         var response = await _repo.GetTurnover(DateTime.Today, DateTime.Today.AddDays(1), userEmail);
 
         if (response != null)
