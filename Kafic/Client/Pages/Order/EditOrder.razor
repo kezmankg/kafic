@@ -41,7 +41,7 @@
                                     }
                                     <th>Ukupno</th>
                                     <th></th>
-                                
+
                                 </tr>
                             </thead>
                             <tbody>
@@ -56,9 +56,9 @@
                                             <td>
                                                 <div class="d-flex align-items-center">
                                                     <input type="number" min="0" max="100" class="form-control form-control-sm" style="width: 70px;"
-                                                           @bind="@article.Discount" />
+                                                    @bind="@article.Discount" />
                                                     <button class="btn btn-sm btn-success ms-2"
-                                                            @onclick="() => ApplyDiscount(order.Id, article.Id, article.Discount)">
+                                                    @onclick="() => ApplyDiscount(order.Id, article.Id, article.Discount)">
                                                         Primeni
                                                     </button>
                                                 </div>
@@ -68,7 +68,7 @@
                                         <td class="text-center">
                                             <a class="icon-btn" @onclick="@(() => RemoveArticle(order.Id, article.Id))">🗑️</a>
                                         </td>
-                                    
+
                                     </tr>
                                 }
                             </tbody>
@@ -89,9 +89,9 @@
             <div class="d-flex justify-content-center align-items-center mb-4">
                 Popust na račun (%):
                 <input type="number" min="0" max="100" class="form-control form-control-sm" style="width: 70px;"
-                       @bind="@discountModel.DiscountPercentage" />
+                @bind="@discountModel.DiscountPercentage" />
                 <button class="btn btn-sm btn-success ms-2"
-                        @onclick="() => ApplyDiscountOnBIll()">
+                @onclick="() => ApplyDiscountOnBIll()">
                     Primeni
                 </button>
             </div>
@@ -153,19 +153,26 @@
     }
     private async Task PayOrder(string descNo, string userEmail)
     {
-        // mozda ako totalSum je nula da se ne salje ovde request ??
-        var response = await _repo.PayOrder(descNo, userEmail, totalSum);
-
-        if (response)
+        if (totalSum == 0)
         {
-            // Uspešno promenjeno
-            _navManager.NavigateTo($"/Order/");
+            message = "* Ništa nije poručeno na izabranom stolu!";
         }
         else
         {
-            // Prikaz poruke o grešci
-            message = "* Desila se greška";
+            var response = await _repo.PayOrder(descNo, userEmail, totalSum);
+
+            if (response)
+            {
+                // Uspešno promenjeno
+                _navManager.NavigateTo($"/Order/");
+            }
+            else
+            {
+                // Prikaz poruke o grešci
+                message = "* Desila se greška";
+            }
         }
+        
     }
     private void GoBack()
     {
