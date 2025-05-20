@@ -139,18 +139,8 @@
         _navManager.NavigateTo($"/EditSubGroup/{id}");
     }
 
-    private async Task Delete(int id)
+    private void Delete(int id)
     {
-        var result = await _repoArticle.DeleteSubGroup(id);
-        if (result)
-        {
-            errorMessage = "";
-            AllGroupsWithSubgroups = await _repoArticle.GetAllGroupWithSubgroup(userEmail);
-
-        }
-        else
-        {
-            errorMessage = "Došlo je do greške, molimo kontaktirajte administratora.";
-        }
+        _navManager.NavigateTo($"/Delete/3/{id}");
     }
 }

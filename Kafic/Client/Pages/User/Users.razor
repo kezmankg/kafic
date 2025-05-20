@@ -126,20 +126,9 @@
         _navManager.NavigateTo($"/EditUser/{id}");
     }
 
-    private async Task DeleteUser(Guid id)
+    private void DeleteUser(Guid id)
     {
-        // mozda u posebnu formu
-        var error = await _repo.DeleteUser(id);
-        if (error)
-        {
-            errorMessage = "";
-            AllUsers = await _repo.GetAllUsers(userEmail);
-
-        }
-        else
-        {
-            errorMessage = "Greska pri brisanju";
-        }
+        _navManager.NavigateTo($"/Delete/1/{id}");
     }
     private async Task HandleRegistration()
     {

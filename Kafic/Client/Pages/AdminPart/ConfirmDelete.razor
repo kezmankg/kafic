@@ -1,0 +1,146 @@
+﻿@page "/Delete/{Type}/{Id}/{DeskNo?}/{Id2?}"
+@using Blazored.Toast.Services
+@using Client.Contracts
+@using Client.Static
+@using Share.Models
+
+@inject IOrderRepository _repoOrder
+@inject IAuthenticationRepository _repo1
+@inject IArticleRepository _repo
+@inject NavigationManager _navManager
+@inject IToastService _toastService
+
+<AuthorizeView Roles="Administrator">
+    <Authorized>
+    </Authorized>
+</AuthorizeView>
+<div class="confirm-overlay mt-5">
+    <div class="confirm-box text-center shadowed-form login-form mx-auto">
+        <p>Dali ste sigurni da želite da obrišete?</p>
+        <button class="btn btn-danger px-4 me-2" @onclick="Confirm">Da</button>
+        <button class="btn btn-secondary px-4" @onclick="Refuse">Ne</button>
+    </div>
+</div>
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    [Parameter]
+    public String Id { get; set; }
+    [Parameter]
+    public String? Id2 { get; set; }
+    [Parameter]
+    public String Type { get; set; }
+    [Parameter]
+    public String? DeskNo {get; set;}
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+
+        }
+        else
+        {
+            _navManager.NavigateTo("/login");
+        }
+    }
+
+    private async Task Confirm()
+    {
+        int id;
+        int idArticle;
+        bool result;
+        switch (Type)
+        {
+
+            case "1":
+                Guid guid;
+                Guid.TryParse(Id, out guid);
+                var error = await _repo1.DeleteUser(guid);
+                _navManager.NavigateTo("users");
+                break;
+            case "2":
+                int.TryParse(Id, out id);
+                result = await _repo.DeleteGroup(id);
+                _navManager.NavigateTo("group");
+                break;
+            case "3":                
+                int.TryParse(Id, out id);
+                result = await _repo.DeleteSubGroup(id);
+                _navManager.NavigateTo("subgroup");
+                break;
+            case "4":
+                int.TryParse(Id, out id);
+                result = await _repo.DeleteArticle(id);
+                _navManager.NavigateTo("article");
+                break;
+            case "5":
+                int.TryParse(Id, out id);
+                result = await _repoOrder.DeleteOrder(id);
+                if (DeskNo != null)
+                {
+                    _navManager.NavigateTo($"/editorder/{DeskNo}");
+                }
+                else
+                {
+                    _navManager.NavigateTo("/");
+                }
+                break;
+            case "6":
+                int.TryParse(Id, out id);
+                if (Id2 != null)
+                {
+                    int.TryParse(Id2, out idArticle);
+                    result = await _repoOrder.DeleteArticle(id, idArticle);
+                }
+                if (DeskNo != null)
+                {
+                    _navManager.NavigateTo($"/editorder/{DeskNo}");
+                }
+                else
+                {
+                    _navManager.NavigateTo("/");
+                }
+                break;
+            default:
+                _navManager.NavigateTo("/");
+                break;
+        }
+    }
+    private void Refuse()
+    {
+        switch (Type)
+        {
+            case "1":
+                _navManager.NavigateTo("users");
+                break;
+            case "2":
+                _navManager.NavigateTo("group");
+                break;
+            case "3":
+                _navManager.NavigateTo("subgroup");
+                break;
+            case "4":
+                _navManager.NavigateTo("article");
+                break;
+            case "5":
+            case "6":
+                if (DeskNo != null)
+                {
+                    _navManager.NavigateTo($"/editorder/{DeskNo}");
+                }
+                else
+                {
+                    _navManager.NavigateTo("/");
+                }
+                break;
+            default:
+                _navManager.NavigateTo("/");
+                break;
+        }
+    }
+
+}

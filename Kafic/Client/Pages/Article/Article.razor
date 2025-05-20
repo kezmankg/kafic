@@ -159,18 +159,8 @@
         _navManager.NavigateTo($"/EditArticle/{id}");
     }
 
-    private async Task Delete(int id)
+    private void Delete(int id)
     {
-        var result = await _repoArticle.DeleteArticle(id);
-        if (result)
-        {
-            errorMessage = "";
-            AllArticles = await _repoArticle.GetAllArticles(userEmail);
-
-        }
-        else
-        {
-            errorMessage = "Došlo je do greške, molimo kontaktirajte administratora.";
-        }
+        _navManager.NavigateTo($"/Delete/4/{id}");
     }
 }
