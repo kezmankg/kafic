@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Server.Data;
 using Share.Models;
+using System.Globalization;
 
 namespace Server.Controllers
 {
@@ -476,6 +477,51 @@ namespace Server.Controllers
                     .ToListAsync();
 
                 return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
+            }
+
+        }
+
+        [HttpGet("getTurnover/{userEmail}/{dateFrom}/{dateTo}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetTurnover(string userEmail, string dateFrom, string dateTo)
+        {
+            var location = GetControllerActionNames();
+            try
+            {
+                DateTime dateFromDate = DateTime.ParseExact(
+                    dateFrom,
+                    "dd.MM.yyyy",
+                    CultureInfo.InvariantCulture
+                );
+
+                DateTime dateToDate = DateTime.ParseExact(
+                    dateTo,
+                    "dd.MM.yyyy",
+                    CultureInfo.InvariantCulture
+                );
+                var user = await _userManager.FindByEmailAsync(userEmail);
+                if (user == null)
+                {
+                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
+                        "user ne postoji");
+                }
+
+                var totalPrice = _db.Bills
+                    .Where(b => b.Date >= dateFromDate && b.Date <= dateToDate && b.Caffe != null && b.Caffe.Id == user.CaffeId)
+                    .Sum(b => b.Price);
+
+                TurnoverModel turnoverModel = new TurnoverModel
+                {
+                    DateFrom = dateFromDate,
+                    DateTo = dateToDate,
+                    TotalSum = totalPrice
+                };
+                return Ok(turnoverModel);
             }
             catch (Exception e)
             {

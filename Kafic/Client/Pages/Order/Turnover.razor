@@ -1,0 +1,88 @@
+﻿@page "/Turnover"
+@using Blazored.Toast.Services
+@using Client.Contracts
+@using Client.Static
+@using Share.Models
+
+@inject IOrderRepository _repo
+@inject NavigationManager _navManager
+@inject IToastService _toastService
+
+
+<AuthorizeView>
+    <Authorized>
+        <div class="">
+            <button class="btn btn-secondary" style="float: right;" @onclick="() => GoBack()">Nazad</button>
+            <h3>Promet</h3>
+            <hr />
+            <div class="error-message centered">
+                @if (!string.IsNullOrWhiteSpace(message))
+                {
+                    @message
+                }
+            </div>
+
+            <button class="btn btn-primary" @onclick="HandleCurrentDay">Danasnji promet</button>
+            
+
+            @messageFouUser
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <p>Nemate pristup ovoj stranici.</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+
+@code {
+    private bool isSuccess = true;
+    private string? message;
+    private string? messageFouUser;
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    private String userEmail { get; set; } = string.Empty;
+    private double totalSum { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            userEmail = user.Identity.Name;
+        }
+        else
+        {
+            _navManager.NavigateTo($"/Login");
+        }
+    }
+
+    private void GoBack()
+    {
+        _navManager.NavigateTo($"/order/");
+    }
+
+    private async Task HandleCurrentDay()
+    {
+        message = "";
+        messageFouUser = "";
+        var response = await _repo.GetTurnover(DateTime.Today, DateTime.Today.AddDays(1), userEmail);
+
+        if (response != null)
+        {
+            // Uspešno promenjeno
+            messageFouUser = "Trenutni dnevni promet je: " + response.TotalSum.ToString("F2") + " €";
+        }
+        else
+        {
+            // Prikaz poruke o grešci
+            message = "Došlo je do greške. Molimo kontaktirajte administratora.";
+        }
+    }
+
+
+
+}
+
