@@ -529,5 +529,45 @@ namespace Server.Controllers
             }
 
         }
+
+        [HttpGet("getTurnoverUser/{userEmail}/{dateFrom}/{dateTo}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetTurnoverUser(string userEmail, string dateFrom, string dateTo)
+        {
+            var location = GetControllerActionNames();
+            try
+            {
+                DateTime dateFromDate = DateTime.ParseExact(
+                    dateFrom,
+                    "dd.MM.yyyy",
+                    CultureInfo.InvariantCulture
+                );
+
+                DateTime dateToDate = DateTime.ParseExact(
+                    dateTo,
+                    "dd.MM.yyyy",
+                    CultureInfo.InvariantCulture
+                );
+
+                var totalPrice = _db.OrderPaids.Include(b => b.Bill)
+                    .Where(b => b.Date >= dateFromDate && b.Date <= dateToDate && b.ApplicationUserEmail == userEmail)
+                    .Sum(b => b.TotalPrice);
+
+                TurnoverModel turnoverModel = new TurnoverModel
+                {
+                    DateFrom = dateFromDate,
+                    DateTo = dateToDate,
+                    TotalSum = totalPrice,
+                    UserEmail = userEmail
+                };
+                return Ok(turnoverModel);
+            }
+            catch (Exception e)
+            {
+                return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, $"{e.Message} - {e.InnerException}");
+            }
+
+        }
     }
 }

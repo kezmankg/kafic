@@ -5,6 +5,7 @@
 @using Share.Models
 
 @inject IOrderRepository _repo
+@inject IAuthenticationRepository _repoUser
 @inject NavigationManager _navManager
 @inject IToastService _toastService
 
@@ -36,7 +37,32 @@
                 </div>
                 <button type="submit" class="btn btn-primary">Prikaži promet</button>
             </EditForm>
+            <br /> <br />
+            Ukupno vrednost porudzbina za konobara
 
+            <EditForm Model="@turnoverUser" OnValidSubmit="HandleUserDateRangeSubmit" Context="EditForm2">
+                <div class="form-group">
+                    <label>Datum od:</label>
+                    <InputDate @bind-Value="turnoverUser.DateFrom" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>Datum do:</label>
+                    <InputDate @bind-Value="turnoverUser.DateTo" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label for="group">Izaberi konobara</label>
+                    <InputSelect @bind-Value="turnoverUser.UserEmail" class="form-control" id="group">
+                        <option value="">-- Izaberite konobara --</option>
+                        @foreach (var user in AllUsers)
+                        {
+                            <option value="@user.Email">@user.FullName</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => turnoverUser.UserEmail)" class="error-message" />
+                </div>
+                <button type="submit" class="btn btn-primary">Prikaži promet</button>
+            </EditForm>
+            <br />
             @messageFouUser
         </div>
     </Authorized>
@@ -58,8 +84,17 @@
             DateFrom = DateTime.Today,
             DateTo = DateTime.Today
         };
+
+    TurnoverModel turnoverUser = new()
+        {
+            DateFrom = DateTime.Today,
+            DateTo = DateTime.Today
+        };
+
     private String userEmail { get; set; } = string.Empty;
     private double totalSum { get; set; }
+
+    private IList<RegistrationUserModel> AllUsers = new List<RegistrationUserModel>();
 
     protected override async Task OnParametersSetAsync()
     {
@@ -69,6 +104,7 @@
         if (user.Identity.IsAuthenticated)
         {
             userEmail = user.Identity.Name;
+            AllUsers = await _repoUser.GetAllUsers(userEmail);
         }
         else
         {
@@ -120,7 +156,31 @@
         }
     }
 
+    private async Task HandleUserDateRangeSubmit()
+    {
+        message = "";
+        messageFouUser = "";
+        if (string.IsNullOrEmpty(turnoverUser.UserEmail))
+        {
+            message = "Morate uneti konobara";
+            return;
+        }
+        var response = await _repo.GetTurnoverForUser(turnoverUser.DateFrom, turnoverUser.DateTo, turnoverUser.UserEmail);
 
+        if (response != null)
+        {
+            // Uspešno promenjeno
+            messageFouUser = "Promet od datuma: "
+            + response.DateFrom.ToString("dd.MM.yyyy") + " do datuma: "
+            + response.DateTo.ToString("dd.MM.yyyy") + " je: " + response.TotalSum.ToString("F2") + " €" + " za konobara: " 
+            + response.UserEmail;
+        }
+        else
+        {
+            // Prikaz poruke o grešci
+            message = "Došlo je do greške. Molimo kontaktirajte administratora.";
+        }
+    }
 
 }
 

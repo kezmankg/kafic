@@ -125,6 +125,16 @@ namespace Client.Service
                 (Endpoints.GetTurnoverEndpoint + userEmail+ "/"  + dateFrom.ToString("dd.MM.yyyy") + "/" + dateTo.ToString("dd.MM.yyyy"));
             return reponse;
         }
+
+        public async Task<TurnoverModel> GetTurnoverForUser(DateTime dateFrom, DateTime dateTo, string userEmail)
+        {
+            _client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("bearer", await GetBearerToken());
+
+            var reponse = await _client.GetFromJsonAsync<TurnoverModel>
+                (Endpoints.GetTurnoverUserEndpoint + userEmail + "/" + dateFrom.ToString("dd.MM.yyyy") + "/" + dateTo.ToString("dd.MM.yyyy"));
+            return reponse;
+        }
         private async Task<string> GetBearerToken()
         {
             return await _localStorage.GetItemAsync<string>("authToken");
