@@ -14,6 +14,7 @@ namespace Client.Contracts
         public Task<bool> UpdateDiscountOnBill(DiscountModel model);
         public Task<IList<ArticleModelOrder>> GetAllArticles(string email, string deskno);
         public Task<TurnoverModel> GetTurnover(DateTime dateFrom, DateTime dateTo, string userEmail);
+        public Task<TurnoverModel> GetTurnoverForUser(DateTime dateFrom, DateTime dateTo, string userEmail);
 
     }
 }

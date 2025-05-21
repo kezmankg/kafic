@@ -44,5 +44,6 @@
         public static string UpdateBillDiscountEndpoint = $"{BaseUrl}api/order/updateDiscountOnBill/";
         public static string GetAllOrderArticlesEndpoint = $"{BaseUrl}api/order/getAllArticles/";
         public static string GetTurnoverEndpoint = $"{BaseUrl}api/order/getTurnover/";
+        public static string GetTurnoverUserEndpoint = $"{BaseUrl}api/order/getTurnoverUser/";
     }
 }
