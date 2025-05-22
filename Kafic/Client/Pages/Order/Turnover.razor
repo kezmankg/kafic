@@ -12,7 +12,6 @@
 
 <AuthorizeView>
     <Authorized>
-        <div class="">
             <button class="btn btn-secondary" style="float: right;" @onclick="() => GoBack()">Nazad</button>
             <h3>Promet</h3>
             <hr />
@@ -22,49 +21,70 @@
                     @message
                 }
             </div>
+            <div class="col-md-4 mx-auto">
+                <div class="text-center">
+                    <button class="btn-sm btn-primary" @onclick="HandleCurrentDay">Današnji promet</button>
+                    <button class="btn-sm btn-secondary" @onclick="ShowDateFilters">Datum filter</button>
+                    <button class="btn-sm btn-secondary" @onclick="ShowWaiterFilters">Konobar filter</button>
+                </div>
 
-            <button class="btn btn-primary" @onclick="HandleCurrentDay">Danasnji promet</button>
-            <br /><br />
-            Promet za odredjeni period
-            <EditForm Model="@dateRange" OnValidSubmit="HandleDateRangeSubmit" Context="EditForm1">
-                <div class="form-group">
-                    <label>Datum od:</label>
-                    <InputDate @bind-Value="dateRange.DateFrom" class="form-control" />
-                </div>
-                <div class="form-group">
-                    <label>Datum do:</label>
-                    <InputDate @bind-Value="dateRange.DateTo" class="form-control" />
-                </div>
-                <button type="submit" class="btn btn-primary">Prikaži promet</button>
-            </EditForm>
-            <br /> <br />
-            Ukupno vrednost porudzbina za konobara
+                @if (showWaiterFilter)
+                {
+                    <div class="mt-3">
+                        <h5>Ukupno vrednost porudžbina za konobara</h5>   
+                        <EditForm Model="@turnoverUser" OnValidSubmit="HandleUserDateRangeSubmit" Context="EditForm2">
+                            <div class="form-group">
+                                <label>Datum od:</label>
+                                <InputDate @bind-Value="turnoverUser.DateFrom" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <label>Datum do:</label>
+                                <InputDate @bind-Value="turnoverUser.DateTo" class="form-control" />
+                            </div>
+                            <div class="form-group mb-4">
+                                <label for="group">Izaberi konobara</label>
+                                <InputSelect @bind-Value="turnoverUser.UserEmail" class="form-control" id="group">
+                                    <option value="">-- Izaberite konobara --</option>
+                                    @foreach (var user in AllUsers)
+                                    {
+                                        <option value="@user.Email">@user.FullName</option>
+                                    }
+                                </InputSelect>
+                                <ValidationMessage For="@(() => turnoverUser.UserEmail)" class="error-message" />
+                            </div>
+                            <div class="text-center">
+                                <button type="submit" class="btn-sm btn-primary">Prikaži promet</button>
+                            </div>
+                        </EditForm>
+                    </div>
+                }
 
-            <EditForm Model="@turnoverUser" OnValidSubmit="HandleUserDateRangeSubmit" Context="EditForm2">
-                <div class="form-group">
-                    <label>Datum od:</label>
-                    <InputDate @bind-Value="turnoverUser.DateFrom" class="form-control" />
-                </div>
-                <div class="form-group">
-                    <label>Datum do:</label>
-                    <InputDate @bind-Value="turnoverUser.DateTo" class="form-control" />
-                </div>
-                <div class="form-group">
-                    <label for="group">Izaberi konobara</label>
-                    <InputSelect @bind-Value="turnoverUser.UserEmail" class="form-control" id="group">
-                        <option value="">-- Izaberite konobara --</option>
-                        @foreach (var user in AllUsers)
-                        {
-                            <option value="@user.Email">@user.FullName</option>
-                        }
-                    </InputSelect>
-                    <ValidationMessage For="@(() => turnoverUser.UserEmail)" class="error-message" />
-                </div>
-                <button type="submit" class="btn btn-primary">Prikaži promet</button>
-            </EditForm>
+                @if (showDateFilter)
+                {
+                    <div class="mt-3">
+                        <h5>Promet za odredjeni period</h5>
+                        <EditForm Model="@dateRange" OnValidSubmit="HandleDateRangeSubmit" Context="EditForm1">
+                            <div class="form-group">
+                                <label>Datum od:</label>
+                                <InputDate @bind-Value="dateRange.DateFrom" class="form-control" />
+                            </div>
+                            <div class="form-group mb-4">
+                                <label>Datum do:</label>
+                                <InputDate @bind-Value="dateRange.DateTo" class="form-control" />
+                            </div>
+                            <div class="text-center">
+                                <button type="submit" class="btn-sm btn-primary">Prikaži promet</button>
+                            </div>
+                        </EditForm>
+                    </div>
+                }
+            </div>
+            <hr />
             <br />
-            @messageFouUser
-        </div>
+            <div class="text-center">
+                 @messageFouUser
+            </div>
+        
     </Authorized>
     <NotAuthorized>
         <p>Nemate pristup ovoj stranici.</p>
@@ -73,6 +93,9 @@
 
 
 @code {
+    public bool showDateFilter = false;
+    public bool showWaiterFilter = false;
+
     private bool isSuccess = true;
     private string? message;
     private string? messageFouUser;
@@ -139,6 +162,8 @@
 
     private async Task HandleCurrentDay()
     {
+        showDateFilter = false;
+        showWaiterFilter = false;
         message = "";
         messageFouUser = "";
 
@@ -181,6 +206,15 @@
             message = "Došlo je do greške. Molimo kontaktirajte administratora.";
         }
     }
-
+    public void ShowDateFilters()
+    {
+        showDateFilter = true;
+        showWaiterFilter = false;
+    }
+    public void ShowWaiterFilters()
+    {
+        showDateFilter = false;
+        showWaiterFilter = true;
+    }
 }
 
