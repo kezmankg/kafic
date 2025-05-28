@@ -1,5 +1,4 @@
 using Blazored.LocalStorage;
-using Blazored.Modal;
 using Blazored.SessionStorage;
 using Blazored.Toast;
 using Client;
@@ -27,7 +26,6 @@ services.AddScoped<JwtSecurityTokenHandler>();
 services.AddBlazoredLocalStorage();
 services.AddBlazoredSessionStorage();
 services.AddBlazoredToast();
-services.AddBlazoredModal();
 
 services.AddTransient<IAuthenticationRepository, AuthenticationRepository>();
 services.AddTransient<IArticleRepository, ArticleRepository>();
