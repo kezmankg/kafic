@@ -14,7 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options             
+                options
                 .UseSqlServer(
                     builder.Configuration.GetConnectionString("DefaultConnection"))
                 .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
@@ -77,6 +77,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseBlazorFrameworkFiles(); // Looks for index.html
+app.UseStaticFiles();  // Serves static content
+
 app.UseRouting();
 
 app.UseCors("CorsPolicy");
@@ -87,6 +90,7 @@ app.UseAuthorization();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
+    endpoints.MapFallbackToFile("index.html"); // for Blazor routing
 });
 
 // Apply migrations at startup
