@@ -115,6 +115,7 @@
 
     private bool isSuccess = true;
     private string message = string.Empty;
+    private String userEmail { get; set; } = string.Empty;
 
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
@@ -126,7 +127,7 @@
 
         if (user.Identity.IsAuthenticated)
         {
-            var userName = user.Identity.Name;
+            userEmail = user.Identity.Name;
             ModelCompany = await _repo.GetCompanyPerEmail(user.Identity.Name);
             AllArticles = await _repoArticle.GetAllArticles(user.Identity.Name);
             OrderModel.ArticleModels.Add(new ArticleModelOrder { Amount = 1 });

@@ -27,7 +27,7 @@
             @foreach (var order in AllOrders)
             {
                 <div >
-                    <p>Porudžbina @iterator - @order.Date - @order.ApplicationUserEmail</p>
+                    <p>Porudžbina @iterator</p>
                     <div class="table-responsive">
                         <table class="table table-hover table-bordered">
                             <thead class="table-active">
@@ -35,12 +35,13 @@
                                     <th>Porudžbina</th>
                                     <th>Količina</th>
                                     <th>Cena</th>
+                                    <th>Popust (%)</th>
+                                    <th>Ukupno</th>
                                     @if (isAdmin)
                                     {
-                                        <th>Popust (%)</th>
+                                        <th></th>
                                     }
-                                    <th>Ukupno</th>
-                                    <th></th>
+                                   
 
                                 </tr>
                             </thead>
@@ -51,23 +52,24 @@
                                         <td>@article.Name</td>
                                         <td>@article.Amount</td>
                                         <td>@article.Price.ToString("F2") €</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <input type="number" min="0" max="100" class="form-control form-control-sm" style="width: 70px;"
+                                                @bind="@article.Discount" />
+                                                <button class="btn btn-sm btn-success ms-2"
+                                                @onclick="() => ApplyDiscount(order.Id, article.Id, article.Discount)">
+                                                    Primeni
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td>@article.TotalPrice €</td>
+                                        
                                         @if (isAdmin)
                                         {
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <input type="number" min="0" max="100" class="form-control form-control-sm" style="width: 70px;"
-                                                    @bind="@article.Discount" />
-                                                    <button class="btn btn-sm btn-success ms-2"
-                                                    @onclick="() => ApplyDiscount(order.Id, article.Id, article.Discount)">
-                                                        Primeni
-                                                    </button>
-                                                </div>
+                                            <td class="text-center">
+                                                <a class="icon-btn" @onclick="@(() => RemoveArticle(order.Id, article.Id))">🗑️</a>
                                             </td>
                                         }
-                                        <td>@article.TotalPrice €</td>
-                                        <td class="text-center">
-                                            <a class="icon-btn" @onclick="@(() => RemoveArticle(order.Id, article.Id))">🗑️</a>
-                                        </td>
 
                                     </tr>
                                 }
@@ -172,7 +174,7 @@
                 message = "* Desila se greška";
             }
         }
-        
+
     }
     private void GoBack()
     {
@@ -181,30 +183,48 @@
 
     private async Task ApplyDiscount(int orderId, int articleId, double discountPercentage)
     {
-        ArticleDiscountModelOrder articleDiscountModelOrder = new ArticleDiscountModelOrder
-            {
-                OrderId = orderId,
-                ArticleId = articleId,
-                Discount = discountPercentage,
-                UserEmail = userEmail,
-                DeskNo = DeskNo
-            };
-        var result = await _repo.UpdateDiscount(articleDiscountModelOrder);
-        if (result)
+        if (discountPercentage > 100 || discountPercentage < 0)
         {
-            message = "";
+            message = "Popust mora biti veći od 0% i manji od 100%.";
             AllOrders = await _repo.GetAllOrder(userEmail, DeskNo);
             totalSum = AllOrders.Sum(o => o.TotalOrderPrice) * (100 - discountModel.DiscountPercentage) / 100;
-
         }
         else
         {
-            message = "Došlo je do greške, molimo kontaktirajte administratora.";
-        }
+            ArticleDiscountModelOrder articleDiscountModelOrder = new ArticleDiscountModelOrder
+                {
+                    OrderId = orderId,
+                    ArticleId = articleId,
+                    Discount = discountPercentage,
+                    UserEmail = userEmail,
+                    DeskNo = DeskNo
+                };
+            var result = await _repo.UpdateDiscount(articleDiscountModelOrder);
+            if (result)
+            {
+                message = "";
+                AllOrders = await _repo.GetAllOrder(userEmail, DeskNo);
+                totalSum = AllOrders.Sum(o => o.TotalOrderPrice) * (100 - discountModel.DiscountPercentage) / 100;
+
+            }
+            else
+            {
+                message = "Došlo je do greške, molimo kontaktirajte administratora.";
+            }
+        }        
     }
 
     private async Task ApplyDiscountOnBIll()
     {
+        if (discountModel.DiscountPercentage > 100 || discountModel.DiscountPercentage < 0)
+        {
+            message = "Popust mora biti veći od 0% i manji od 100%.";
+            AllOrders = await _repo.GetAllOrder(userEmail, DeskNo);
+            discountModel = await _repo.GetDiscount(userEmail, DeskNo);
+            totalSum = AllOrders.Sum(o => o.TotalOrderPrice) * (100 - discountModel.DiscountPercentage) / 100;
+            return;
+        }
+
         if (discountModel.Id == 0)
         {
             discountModel.UserEmail = userEmail;
