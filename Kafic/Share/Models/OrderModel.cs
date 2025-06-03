@@ -16,8 +16,6 @@ namespace Share.Models
         public string? DeskNo { get; set; }
         public DateTime Date { get; set; }
         public virtual IList<ArticleModelOrder> ArticleModels { get; set; } = new List<ArticleModelOrder>();
-        [Required(ErrorMessage = "Obavezno polje")]
-        [Display(Name = "Konobar")]
         public string? ApplicationUserEmail { get; set; }
 
         public double TotalOrderPrice => ArticleModels.Sum(a => a.TotalPrice);

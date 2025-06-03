@@ -257,6 +257,8 @@ namespace Server.Controllers
                     CaffeId = (int)user.CaffeId,
                     Date = DateTime.UtcNow,
                     Price = model.TotalSum,
+                    ApplicationUserEmail = model.UserEmail,
+                    DeskNo = model.DescNo,
                     OrderPaids = new List<OrderPaid>() 
                 };
 

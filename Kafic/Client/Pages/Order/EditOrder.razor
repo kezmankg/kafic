@@ -5,6 +5,7 @@
 @using Share.Models
 
 @inject IOrderRepository _repo
+@inject IAuthenticationRepository _repoUser
 @inject NavigationManager _navManager
 @inject IToastService _toastService
 
@@ -101,9 +102,30 @@
                 <span class="me-4">Ukupna cena računa: @totalSum.ToString("F2") € </span>
                 <button class="btn btn-primary" @onclick="() => ShowBill(DeskNo)">Prikaz računa</button>
             </div>
-            <div class="centered mb-4">
-                <button class="btn btn-primary" @onclick="() => PayOrder(DeskNo, userEmail)">Plaćanje</button>
-            </div>
+
+            @if (isAdmin)
+            {           
+                <div class="centered mb-4">
+                    <label>Izaberi konobara</label>
+                    <div class="d-flex justify-content-center mb-4">
+                        <InputSelect @bind-Value="selectedEmail" class="form-control text-center" style="width: auto; min-width: 200px;">
+                            <option value="">-- Izaberite konobara --</option>
+                            @foreach (var user in AllUsers)
+                            {
+                                <option value="@user.Email">@user.FullName</option>
+                            }
+                        </InputSelect>
+                    </div>
+                    <button class="btn btn-primary" @onclick="PayOrder" disabled="@string.IsNullOrWhiteSpace(selectedEmail)">Plaćanje</button>
+                </div>
+            }
+            else
+            {
+                <div class="centered mb-4">
+                    <button class="btn btn-primary" @onclick="() => PayOrder()">Plaćanje</button>
+                </div>
+            }
+            
         </div>
     </Authorized>
     <NotAuthorized>
@@ -115,6 +137,7 @@
 @code {
     private IList<OrderModel> AllOrders = new List<OrderModel>();
     private DiscountModel discountModel = new DiscountModel();
+    private IList<RegistrationUserModel> AllUsers = new List<RegistrationUserModel>();
     private bool isSuccess = true;
     private string? message;
 
@@ -124,6 +147,7 @@
     [Parameter]
     public String DeskNo { get; set; } = string.Empty;
     private String userEmail { get; set; } = string.Empty;
+    private String selectedEmail { get; set; } = string.Empty;
     private double totalSum { get; set; }
     private bool isAdmin = false;
 
@@ -139,6 +163,7 @@
             AllOrders = await _repo.GetAllOrder(user.Identity.Name, DeskNo);
             discountModel = await _repo.GetDiscount(userEmail, DeskNo);
             totalSum = AllOrders.Sum(o => o.TotalOrderPrice) * (100 - discountModel.DiscountPercentage) / 100;
+            AllUsers = await _repoUser.GetAllUsers(user.Identity.Name);
         }
         else
         {
@@ -153,7 +178,7 @@
     {
         _navManager.NavigateTo($"/Delete/6/{idOrder}/{DeskNo}/{idArticle}");
     }
-    private async Task PayOrder(string descNo, string userEmail)
+    private async Task PayOrder()
     {
         if (totalSum == 0)
         {
@@ -161,7 +186,24 @@
         }
         else
         {
-            var response = await _repo.PayOrder(descNo, userEmail, totalSum);
+            string emailToSend = string.Empty;
+            if (isAdmin)
+            {
+                if (string.IsNullOrWhiteSpace(selectedEmail))
+                {
+                    message = "* Izaberite konobara";
+                }
+                else
+                {
+                    emailToSend = selectedEmail;
+                }
+            }
+            else
+            {
+                emailToSend = userEmail;
+            }
+
+            var response = await _repo.PayOrder(DeskNo, emailToSend, totalSum);
 
             if (response)
             {

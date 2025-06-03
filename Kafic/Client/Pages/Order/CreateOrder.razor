@@ -39,9 +39,9 @@
                             <option value="Lezaljka @i">Ležaljka @i</option>
                         }
                     </InputSelect>
-                    <ValidationMessage For="@(() => OrderModel.ApplicationUserEmail)" class="error-message" />
+                    <ValidationMessage For="@(() => OrderModel.DeskNo)" class="error-message" />
                 </div>
-                <div class="form-group col-md-6">
+                @* <div class="form-group col-md-6">
                     <label for="group">Izaberi konobara</label>
                     <InputSelect @bind-Value="OrderModel.ApplicationUserEmail" class="form-control" id="group">
                         <option value="">-- Izaberite konobara --</option>
@@ -51,7 +51,7 @@
                         }
                     </InputSelect>
                     <ValidationMessage For="@(() => OrderModel.ApplicationUserEmail)" class="error-message"/>
-                </div>
+                </div> *@
             </div>
             <br />
             <hr />
@@ -157,6 +157,7 @@
                 return;
             }
         }
+        OrderModel.ApplicationUserEmail = userEmail;
         var response = await _repoOrder.AddOrder(OrderModel);
 
         if (response)

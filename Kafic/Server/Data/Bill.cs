@@ -9,6 +9,8 @@
         public double Discount { get; set; }
         //Uracunat je popust u TotalPrice
         public double Price { get; set; }
+        public string? ApplicationUserEmail { get; set; }
+        public string? DeskNo { get; set; }
         public virtual IList<OrderPaid> OrderPaids { get; set; } = new List<OrderPaid>();
     }
 }
