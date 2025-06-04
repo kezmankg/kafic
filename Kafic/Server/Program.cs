@@ -97,10 +97,12 @@ app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllers();
     endpoints.MapRazorPages();
-    endpoints.MapFallbackToFile("index.html");
+    
     endpoints.MapControllerRoute(
         name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}");
+
+    endpoints.MapFallbackToFile("index.html");
 });
 
 // Apply migrations at startup
