@@ -36,13 +36,17 @@ namespace Server.Controllers
             var location = GetControllerActionNames();
             try
             {
-                var user = await _userManager.FindByEmailAsync(model.AdminEmail);
-                if (user == null)
+                var caffeId = await _db.Users
+                    .Where(u => u.Email == model.AdminEmail)
+                    .Select(u => u.CaffeId)
+                    .FirstOrDefaultAsync();
+
+                if (caffeId == null)
                 {
                     return this.Unauthorized("No user found for userName:" + model.AdminEmail);
                 }
                 var group = _mapper.Map<Group>(model);
-                group.CaffeId = user.CaffeId;
+                group.CaffeId = caffeId;
 
                 _db.Groups.Add(group);
 
@@ -68,19 +72,24 @@ namespace Server.Controllers
         [HttpGet("getAllGroups/{email}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetTeamCategoriesTenant(string email)
+        public async Task<IActionResult> GetAllGroups(string email)
         {
             var location = GetControllerActionNames();
             try
             {
-                var userAdmin = await _userManager.FindByEmailAsync(email);
-                if (userAdmin == null)
+                var caffeId = await _db.Users
+                    .AsNoTracking()
+                    .Where(u => u.Email == email)
+                    .Select(u => u.CaffeId)
+                    .FirstOrDefaultAsync();
+
+                if (caffeId == null)
                 {
                     return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
                         "user ne postoji");
                 }
 
-                var groups = await _db.Groups.Where(q => q.CaffeId == userAdmin.CaffeId).ToListAsync();
+                var groups = await _db.Groups.AsNoTracking().Where(q => q.CaffeId == caffeId).ToListAsync();
 
                 var response = _mapper.Map<IList<GroupModel>>(groups);
                 return Ok(response);
@@ -101,7 +110,7 @@ namespace Server.Controllers
             var location = GetControllerActionNames();
             try
             {
-                var group = await _db.Groups.FirstOrDefaultAsync(q => q.Id == int.Parse(id));
+                var group = await _db.Groups.AsNoTracking().FirstOrDefaultAsync(q => q.Id == int.Parse(id));
 
                 if (group == null)
                 {
@@ -195,14 +204,18 @@ namespace Server.Controllers
             var location = GetControllerActionNames();
             try
             {
-                var userAdmin = await _userManager.FindByEmailAsync(email);
-                if (userAdmin == null)
+                var caffeId = await _db.Users.AsNoTracking()
+                    .Where(u => u.Email == email)
+                    .Select(u => u.CaffeId)
+                    .FirstOrDefaultAsync();
+
+                if (caffeId == null)
                 {
                     return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
                         "user ne postoji");
                 }
 
-                var groups = await _db.Groups.AsNoTracking().Where(q => q.CaffeId == userAdmin.CaffeId).Include(g => g.Subgroups).AsSplitQuery().ToListAsync();
+                var groups = await _db.Groups.AsNoTracking().Where(q => q.CaffeId == caffeId).Include(g => g.Subgroups).AsSplitQuery().ToListAsync();
 
                 var response = _mapper.Map<IList<GroupModel>>(groups);
                 return Ok(response);
@@ -318,15 +331,20 @@ namespace Server.Controllers
             var location = GetControllerActionNames();
             try
             {
-                var userAdmin = await _userManager.FindByEmailAsync(email);
-                if (userAdmin == null)
+                var caffeId = await _db.Users
+                    .AsNoTracking()
+                    .Where(u => u.Email == email)
+                    .Select(u => u.CaffeId)
+                    .FirstOrDefaultAsync();
+
+                if (caffeId == null)
                 {
                     return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
                         "user ne postoji");
                 }
 
                 var groups = await _db.Groups.AsNoTracking()
-                    .Where(g => g.CaffeId == userAdmin.CaffeId &&
+                    .Where(g => g.CaffeId == caffeId &&
                                 g.Subgroups.Any(sg => sg.Articles.Any()))
                     .Include(g => g.Subgroups.Where(sg => sg.Articles.Any()))
                         .ThenInclude(sg => sg.Articles)

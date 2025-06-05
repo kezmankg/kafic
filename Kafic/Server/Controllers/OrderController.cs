@@ -38,53 +38,36 @@ namespace Server.Controllers
             using var transaction = await _db.Database.BeginTransactionAsync();
             try
             {
-                var user = await _userManager.FindByEmailAsync(model.ApplicationUserEmail);
-                if (user == null)
-                {
-                    return this.Unauthorized("No user found for userName:" + model.ApplicationUserEmail);
-                }
-                if (user.CaffeId == null)
+                var caffeId = await _db.Users
+                    .Where(u => u.Email == model.ApplicationUserEmail)
+                    .Select(u => u.CaffeId)
+                    .FirstOrDefaultAsync();
+
+                if (caffeId == null)
                 {
                     return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
                         "Caffe Id je null kod kreiranja porudzbine");
                 }
-                Order order = new Order
+                var groupedArticles = model.ArticleModels
+                    .GroupBy(a => a.Id)
+                    .Select(g => new OrderArticle
+                    {
+                        ArticleId = g.Key,
+                        Amount = g.Sum(a => a.Amount)
+                    }).ToList();
+
+                var order = new Order
                 {
                     DeskNo = model.DeskNo,
                     ApplicationUserEmail = model.ApplicationUserEmail,
-                    Date = DateTime.Now,
-                    CaffeId = (int)user.CaffeId
+                    Date = DateTime.UtcNow,
+                    CaffeId = (int)caffeId,
+                    OrderArticles = groupedArticles // direktna veza
                 };
 
                 _db.Orders.Add(order);
+
                 var changes = await _db.SaveChangesAsync();
-                if (changes <= 0)
-                {
-                    await transaction.RollbackAsync();
-                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
-                    "Create order");
-                }
-
-                var groupedArticles = model.ArticleModels
-                    .GroupBy(a => a.Id)
-                    .Select(g => new
-                    {
-                        ArticleId = g.Key,
-                        TotalAmount = g.Sum(a => a.Amount)
-                    });
-
-                foreach (var article in groupedArticles)
-                {
-                    OrderArticle orderArticle = new OrderArticle
-                    {
-                        ArticleId = article.ArticleId,
-                        OrderId = order.Id,
-                        Amount = article.TotalAmount,
-                    };
-                    _db.OrderArticles.Add(orderArticle);
-                }
-
-                changes = await _db.SaveChangesAsync();
 
                 if (changes > 0)
                 {
@@ -114,14 +97,21 @@ namespace Server.Controllers
             var location = GetControllerActionNames();
             try
             {
-                var user = await _userManager.FindByEmailAsync(email);
-                if (user == null)
+                var caffeId = await _db.Users
+                   .AsNoTracking()
+                   .Where(u => u.Email == email)
+                   .Select(u => u.CaffeId)
+                   .FirstOrDefaultAsync();
+
+                if (caffeId == null)
                 {
                     return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
                         "user ne postoji");
                 }
 
-                var orders = await _db.Orders.Where(q => q.CaffeId == user.CaffeId && q.DeskNo == deskno)
+                var orders = await _db.Orders
+                    .AsNoTracking()
+                    .Where(q => q.CaffeId == caffeId && q.DeskNo == deskno)
                     .Include(c => c.OrderArticles)
                     .ThenInclude(k => k.Article)
                     .AsSplitQuery()
@@ -245,24 +235,58 @@ namespace Server.Controllers
             using var transaction = await _db.Database.BeginTransactionAsync();
             try
             {
-                var user = await _userManager.FindByEmailAsync(model.UserEmail);
-                if (user == null)
+                var caffeId = await _db.Users
+                    .Where(u => u.Email == model.UserEmail)
+                    .Select(u => u.CaffeId)
+                    .FirstOrDefaultAsync();
+
+                if (caffeId == null)
                 {
                     return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
                         "user ne postoji");
+                }     
+
+                var orders = await _db.Orders.Where(q => q.CaffeId == caffeId && q.DeskNo == model.DescNo)
+                    .Include(c => c.OrderArticles).ThenInclude(q => q.Article)
+                    .AsSplitQuery()
+                    .ToListAsync();
+
+                if (orders.Count == 0)
+                {
+                    return await InternalErrorAsync("Nema aktivnih porudžbina za navedeni sto.", location, "Nema narudžbina");
                 }
+
+                var orderPaids = orders.Select(order =>
+                {
+                    var paidArticles = order.OrderArticles.Select(oa => new OrderPaidArticle
+                    {
+                        ArticleId = oa.ArticleId,
+                        Amount = oa.Amount,
+                        Discount = oa.Discount,
+                        TotalPrice = oa.Amount * oa.Article.Price * (100 - oa.Discount) / 100
+                    }).ToList();
+
+                    return new OrderPaid
+                    {
+                        DeskNo = order.DeskNo,
+                        Date = order.Date,
+                        ApplicationUserEmail = order.ApplicationUserEmail,
+                        OrderArticles = paidArticles,
+                        TotalPrice = paidArticles.Sum(pa => pa.TotalPrice),
+                    };
+                }).ToList();
 
                 var bill = new Bill
                 {
-                    CaffeId = (int)user.CaffeId,
+                    CaffeId = (int)caffeId,
                     Date = DateTime.UtcNow,
                     Price = model.TotalSum,
                     ApplicationUserEmail = model.UserEmail,
                     DeskNo = model.DescNo,
-                    OrderPaids = new List<OrderPaid>() 
+                    OrderPaids = orderPaids
                 };
 
-                var discount = await _db.Discounts.FirstOrDefaultAsync(q => q.CaffeId == user.CaffeId && q.DeskNo == model.DescNo);
+                var discount = await _db.Discounts.FirstOrDefaultAsync(q => q.CaffeId == caffeId && q.DeskNo == model.DescNo);
 
                 if (discount != null)
                 {
@@ -270,39 +294,10 @@ namespace Server.Controllers
                     _db.Discounts.Remove(discount);
                 }
 
-                var orders = await _db.Orders.Where(q => q.CaffeId == user.CaffeId && q.DeskNo == model.DescNo)
-                    .Include(c => c.OrderArticles).ThenInclude(q => q.Article)
-                    .AsSplitQuery()
-                    .ToListAsync();
+                _db.Bills.Add(bill);
 
-                foreach (var order in orders)
-                {
-                    var orderPaidArticles = order.OrderArticles.Select(oa => new OrderPaidArticle
-                    {
-                        ArticleId = oa.ArticleId,
-                        Amount = oa.Amount,
-                        Discount = oa.Discount,
-                        TotalPrice = oa.Amount * oa.Article.Price * (100 - oa.Discount) / 100,
-                    }).ToList();
-
-                    var orderPaid = new OrderPaid
-                    {
-                        DeskNo = order.DeskNo,
-                        Date = order.Date,
-                        ApplicationUserEmail = order.ApplicationUserEmail,
-                        OrderArticles = orderPaidArticles,
-                        TotalPrice = orderPaidArticles.Sum(oa => oa.TotalPrice),
-                        Bill = bill
-                    };
-
-                    _db.OrderPaids.Add(orderPaid);
-                }
-
-                var orders1 = await _db.Orders.Where(q => q.CaffeId == user.CaffeId && q.DeskNo == model.DescNo).ToListAsync();
-                foreach (var order in orders1)
-                {
-                    _db.Orders.Remove(order);
-                }
+                var orders1 = await _db.Orders.Where(q => q.CaffeId == caffeId && q.DeskNo == model.DescNo).ToListAsync();
+                _db.Orders.RemoveRange(orders1);
 
                 var changes = await _db.SaveChangesAsync();
 
@@ -331,22 +326,26 @@ namespace Server.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> UpdateOrder(ArticleDiscountModelOrder model)
+        public async Task<IActionResult> UpdateDiscount(ArticleDiscountModelOrder model)
         {
             var location = GetControllerActionNames();
             try
             {
-                var user = await _userManager.FindByEmailAsync(model.UserEmail);
-                if (user == null)
+                var caffeId = await _db.Users
+                   .Where(u => u.Email == model.UserEmail)
+                   .Select(u => u.CaffeId)
+                   .FirstOrDefaultAsync();
+
+                if (caffeId == null)
                 {
                     return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
                         "user ne postoji");
                 }
                 var orderArticles = await _db.OrderArticles
                     .Where(oa => oa.ArticleId == model.ArticleId &&
-                                 oa.Order.CaffeId == user.CaffeId &&
+                                 oa.Order.CaffeId == caffeId &&
                                  oa.Order.DeskNo == model.DeskNo)
-                    .Include(oa => oa.Order)
+                    //.Include(oa => oa.Order)
                     .ToListAsync();
 
                 foreach (var orderArticle in orderArticles)
@@ -382,14 +381,19 @@ namespace Server.Controllers
             var location = GetControllerActionNames();
             try
             {
-                var user = await _userManager.FindByEmailAsync(email);
-                if (user == null)
+                var caffeId = await _db.Users
+                   .AsNoTracking()
+                   .Where(u => u.Email == email)
+                   .Select(u => u.CaffeId)
+                   .FirstOrDefaultAsync();
+
+                if (caffeId == null)
                 {
                     return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
                         "user ne postoji");
                 }
 
-                var discount = await _db.Discounts.FirstOrDefaultAsync(q => q.CaffeId == user.CaffeId && q.DeskNo == deskno);
+                var discount = await _db.Discounts.AsNoTracking().FirstOrDefaultAsync(q => q.CaffeId == caffeId && q.DeskNo == deskno);
 
                 if(discount == null)
                 {
@@ -420,13 +424,17 @@ namespace Server.Controllers
 
                 if (model.Id == 0)
                 {
-                    var user = await _userManager.FindByEmailAsync(model.UserEmail);
-                    if (user == null)
-                    {
+                    var caffeId = await _db.Users
+                        .Where(u => u.Email == model.UserEmail)
+                        .Select(u => u.CaffeId)
+                        .FirstOrDefaultAsync();
+
+                    if (caffeId == null) 
+                    { 
                         return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
                             "user ne postoji");
                     }
-                    discount.CaffeId = (int)user.CaffeId;
+                    discount.CaffeId = (int)caffeId;
                 }
 
                 _db.Discounts.Update(discount);
@@ -457,18 +465,33 @@ namespace Server.Controllers
             var location = GetControllerActionNames();
             try
             {
-                var user = await _userManager.FindByEmailAsync(email);
-                if (user == null)
+                var caffeId = await _db.Users
+                    .AsNoTracking()
+                    .Where(u => u.Email == email)
+                    .Select(u => u.CaffeId)
+                    .FirstOrDefaultAsync();
+
+                if (caffeId == null)
                 {
-                    return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
-                        "user ne postoji");
+                    return await InternalErrorAsync("Došlo je do greške, kontaktirajte administratora", location,
+                        "User ne postoji");
                 }
 
                 var result = await _db.OrderArticles
-                    .Include(q => q.Order)
-                    .Include(q => q.Article)
-                    .Where(oa => oa.Order.CaffeId == user.CaffeId && oa.Order.DeskNo == deskno)
-                    .GroupBy(oa => new { oa.ArticleId, oa.Article.Name, oa.Article.Price, oa.Discount })
+                    .AsNoTracking()
+                    .Where(oa => oa.Order.CaffeId == caffeId && oa.Order.DeskNo == deskno)
+                    .Select(oa => new
+                    {
+                        oa.ArticleId,
+                        oa.Article.Name,
+                        oa.Article.Price,
+                        oa.Discount,
+                        oa.Amount
+                    })
+                    .ToListAsync();
+
+                var grouped = result
+                    .GroupBy(x => new { x.ArticleId, x.Name, x.Price, x.Discount })
                     .Select(g => new ArticleModelOrder
                     {
                         Name = g.Key.Name,
@@ -476,9 +499,9 @@ namespace Server.Controllers
                         Price = g.Key.Price,
                         Discount = g.Key.Discount
                     })
-                    .ToListAsync();
+                    .ToList();
 
-                return Ok(result);
+                return Ok(grouped);
             }
             catch (Exception e)
             {

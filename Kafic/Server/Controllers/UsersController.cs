@@ -173,13 +173,18 @@ namespace Server.Controllers
             var location = GetControllerActionNames();
             try
             {
-                var user = await _userManager.FindByEmailAsync(email);
-                if (user == null)
+                var caffeId = await _db.Users
+                    .AsNoTracking()
+                    .Where(u => u.Email == email)
+                    .Select(u => u.CaffeId)
+                    .FirstOrDefaultAsync();
+
+                if (caffeId == null)
                 {
                     return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, 
                         "user ne postoji");
                 }
-                var caffe = await _db.Caffes.FirstOrDefaultAsync(q => q.Id == user.CaffeId);
+                var caffe = await _db.Caffes.AsNoTracking().FirstOrDefaultAsync(q => q.Id == caffeId);
                 if (caffe == null)
                 {
                     return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
@@ -291,19 +296,24 @@ namespace Server.Controllers
         [HttpGet("getAllUsers/{email}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetTeamCategoriesTenant(string email)
+        public async Task<IActionResult> GetAllUsers(string email)
         {
             var location = GetControllerActionNames();
             try
             {
-                var userAdmin = await _userManager.FindByEmailAsync(email);
-                if (userAdmin == null)
+                var caffeId = await _db.Users
+                    .AsNoTracking()
+                    .Where(u => u.Email == email)
+                    .Select(u => u.CaffeId)
+                    .FirstOrDefaultAsync();
+
+                if (caffeId == null)
                 {
                     return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
                         "user ne postoji");
                 }
 
-                var users = await _db.Users.Where(q => q.CaffeId == userAdmin.CaffeId).ToListAsync();
+                var users = await _db.Users.AsNoTracking().Where(q => q.CaffeId == caffeId).ToListAsync();
 
                 var response = _mapper.Map<IList<RegistrationUserModel>>(users);
                 return Ok(response);
