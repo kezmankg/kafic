@@ -48,13 +48,35 @@ namespace Server.Controllers
                     return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
                         "Caffe Id je null kod kreiranja porudzbine");
                 }
-                var groupedArticles = model.ArticleModels
-                    .GroupBy(a => a.Id)
-                    .Select(g => new OrderArticle
+
+                // Dohvatanje prethodnih popusta po artiklu za tog korisnika
+                var previousDiscounts = await _db.Orders
+                    .Where(o => o.ApplicationUserEmail == model.ApplicationUserEmail)
+                    .SelectMany(o => o.OrderArticles)
+                    .GroupBy(oa => oa.ArticleId)
+                    .Select(g => new
                     {
                         ArticleId = g.Key,
-                        Amount = g.Sum(a => a.Amount)
-                    }).ToList();
+                        Discount = g.OrderByDescending(x => x.OrderId).First().Discount // poslednji popust za svaki artikal
+                    })
+                    .ToDictionaryAsync(x => x.ArticleId, x => x.Discount);
+
+                // Grupisanje artikala iz nove porudžbine i primena prethodnog popusta ako postoji
+                var groupedArticles = model.ArticleModels
+                    .GroupBy(a => a.Id)
+                    .Select(g =>
+                    {
+                        var articleId = g.Key;
+                        var discount = previousDiscounts.ContainsKey(articleId) ? previousDiscounts[articleId] : 0.0;
+
+                        return new OrderArticle
+                        {
+                            ArticleId = articleId,
+                            Amount = g.Sum(a => a.Amount),
+                            Discount = discount
+                        };
+                    })
+                    .ToList();
 
                 var order = new Order
                 {

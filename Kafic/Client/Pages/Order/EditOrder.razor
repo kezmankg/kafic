@@ -163,7 +163,10 @@
             AllOrders = await _repo.GetAllOrder(user.Identity.Name, DeskNo);
             discountModel = await _repo.GetDiscount(userEmail, DeskNo);
             totalSum = AllOrders.Sum(o => o.TotalOrderPrice) * (100 - discountModel.DiscountPercentage) / 100;
-            AllUsers = await _repoUser.GetAllUsers(user.Identity.Name);
+            if (isAdmin)
+            {
+                AllUsers = await _repoUser.GetAllUsers(user.Identity.Name);
+            }           
         }
         else
         {

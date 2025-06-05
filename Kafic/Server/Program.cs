@@ -30,6 +30,8 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader());
 });
 
+builder.Services.AddMemoryCache();
+
 builder.Services.AddAutoMapper(typeof(Maps));
 
 //Identity

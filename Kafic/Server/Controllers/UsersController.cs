@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
@@ -28,6 +29,7 @@ namespace Server.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> roleManager;
+        private readonly IMemoryCache _cache;
         private readonly IMapper _mapper;
         private readonly IConfiguration _config;
 
@@ -36,13 +38,15 @@ namespace Server.Controllers
             UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
             IMapper mapper,
-            IConfiguration config) : base(db)
+            IConfiguration config,
+            IMemoryCache cache) : base(db)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             this.roleManager = roleManager;
             _config = config;
             _mapper = mapper;
+            _cache = cache;
         }
 
         [Route("register")]
@@ -284,6 +288,10 @@ namespace Server.Controllers
                 //Dodavanje rola za usera
                 await _userManager.AddToRoleAsync(user, "Waiter");
 
+                //Brisanje cache
+                string cacheKey = $"GetAllUsers:{userAdmin.CaffeId}";
+                _cache.Remove(cacheKey);
+
                 return Created("login", new { result.Succeeded });
             }
             catch (Exception e)
@@ -313,9 +321,25 @@ namespace Server.Controllers
                         "user ne postoji");
                 }
 
+                string cacheKey = $"GetAllUsers:{caffeId}";
+
+                // Ako postoji u cache-u, vrati to
+                if (_cache.TryGetValue(cacheKey, out IList<RegistrationUserModel> cachedUsers))
+                {
+                    return Ok(cachedUsers);
+                }  
+
                 var users = await _db.Users.AsNoTracking().Where(q => q.CaffeId == caffeId).ToListAsync();
 
                 var response = _mapper.Map<IList<RegistrationUserModel>>(users);
+
+                // Cache-uj rezultat na 5 minuta
+                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                    .SetAbsoluteExpiration(TimeSpan.FromMinutes(15))
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(5));
+
+                _cache.Set(cacheKey, response, cacheEntryOptions);
+
                 return Ok(response);
             }
             catch (Exception e)
@@ -340,10 +364,14 @@ namespace Server.Controllers
                 {
                     return NotFound();
                 }
+
+                string cacheKey = $"GetAllUsers:{user.CaffeId}";
+
                 _db.Users.Remove(user);
                 var changes = await _db.SaveChangesAsync();
                 if (changes > 0)
                 {
+                    _cache.Remove(cacheKey);
                     return NoContent();
                 }
                 else
@@ -411,6 +439,8 @@ namespace Server.Controllers
 
                 if (changes > 0)
                 {
+                    string cacheKey = $"GetAllUsers:{user.CaffeId}";
+                    _cache.Remove(cacheKey);
                     return Ok();
                 }
                 else
