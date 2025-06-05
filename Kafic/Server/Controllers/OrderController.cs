@@ -49,9 +49,9 @@ namespace Server.Controllers
                         "Caffe Id je null kod kreiranja porudzbine");
                 }
 
-                // Dohvatanje prethodnih popusta po artiklu za tog korisnika
+                // Dohvatanje prethodnih popusta 
                 var previousDiscounts = await _db.Orders
-                    .Where(o => o.ApplicationUserEmail == model.ApplicationUserEmail)
+                    .Where(o => o.CaffeId == caffeId && o.DeskNo == model.DeskNo)
                     .SelectMany(o => o.OrderArticles)
                     .GroupBy(oa => oa.ArticleId)
                     .Select(g => new
