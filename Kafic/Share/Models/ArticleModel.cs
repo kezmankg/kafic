@@ -20,6 +20,7 @@ namespace Share.Models
         [Range(1, int.MaxValue, ErrorMessage = "Morate izabrati podgrupu")]
         public int? SubgroupId { get; set; }
         public int? Amount { get; set; }
+        public string? ApplicationUserEmail { get; set; }
 
     }
 

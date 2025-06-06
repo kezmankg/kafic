@@ -105,13 +105,16 @@
                                 {
                                     <button class="btn btn-primary m-1" @onclick="() => SelectGroup(group)">@group.Name</button>
                                 }
+                                <div class="mt-3">
+                                    <br />
+                                </div>
                             }
                             else if (selectedSubgroup == null)
                             {
                                 <h6>Izaberite podgrupu iz grupe <b>@selectedGroup.Name</b>:</h6>
                                 @foreach (var subgroup in selectedGroup.Subgroups)
                                 {
-                                    <button class="btn btn-secondary m-1" @onclick="() => SelectSubgroup(subgroup)">@subgroup.Name</button>
+                                    <button class="btn btn-danger m-1" @onclick="() => SelectSubgroup(subgroup)">@subgroup.Name</button>
                                 }
                                 <div class="mt-3">
                                     <button class="btn btn-sm btn-link" @onclick="() => selectedGroup = null">⟵ Nazad na grupe</button>

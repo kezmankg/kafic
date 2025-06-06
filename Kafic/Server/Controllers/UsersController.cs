@@ -188,13 +188,28 @@ namespace Server.Controllers
                     return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location, 
                         "user ne postoji");
                 }
+
+                string cacheKey = $"GetCompany:{caffeId}";
+
+                if (_cache.TryGetValue(cacheKey, out CompanyModel cachedCompany))
+                {
+                    return Ok(cachedCompany);
+                }
+
                 var caffe = await _db.Caffes.AsNoTracking().FirstOrDefaultAsync(q => q.Id == caffeId);
                 if (caffe == null)
                 {
                     return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
                         "caffe ne postoji");
                 }
+               
                 var response = _mapper.Map<CompanyModel>(caffe);
+
+                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                    .SetAbsoluteExpiration(TimeSpan.FromMinutes(15))
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(5));
+
+                _cache.Set(cacheKey, response, cacheEntryOptions);
 
                 return Ok(response);
             }
@@ -232,6 +247,8 @@ namespace Server.Controllers
 
                 if (changes > 0)
                 {
+                    string cacheKey = $"GetCompany:{caffe.Id}";
+                    _cache.Remove(cacheKey);
                     return Ok();
                 }
                 else

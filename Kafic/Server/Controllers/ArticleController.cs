@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Server.Data;
 using Share.Models;
 using System;
@@ -18,15 +19,18 @@ namespace Server.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
         private readonly IConfiguration _config;
+        private readonly IMemoryCache _cache;
 
         public ArticleController(ApplicationDbContext db,
             UserManager<ApplicationUser> userManager,
             IMapper mapper,
-            IConfiguration config) : base(db)
+            IConfiguration config,
+            IMemoryCache cache) : base(db)
         {
             _userManager = userManager;
             _config = config;
             _mapper = mapper;
+            _cache = cache;
         }
 
         [Route("addGroup")]
@@ -308,10 +312,17 @@ namespace Server.Controllers
 
                 if (changes > 0)
                 {
+                    var caffeId = await _db.Users
+                       .Where(u => u.Email == model.ApplicationUserEmail)
+                       .Select(u => u.CaffeId)
+                       .FirstOrDefaultAsync();
+                    string cacheKey = $"GetAllArticles:{caffeId}";
+                    _cache.Remove(cacheKey);
+
                     return Ok();
                 }
                 else
-                {
+                {                   
                     return await InternalErrorAsync("Doslo je do greske, kontaktirajte administratora", location,
                         "Create article");
                 }
@@ -343,6 +354,13 @@ namespace Server.Controllers
                         "user ne postoji");
                 }
 
+                string cacheKey = $"GetAllArticles:{caffeId}";
+
+                // Ako postoji u cache-u, vrati to
+                if (_cache.TryGetValue(cacheKey, out IList<GroupModel> cachedArticles))
+                {
+                    return Ok(cachedArticles);
+                }
                 var groups = await _db.Groups.AsNoTracking()
                     .Where(g => g.CaffeId == caffeId &&
                                 g.Subgroups.Any(sg => sg.Articles.Any()))
@@ -351,6 +369,13 @@ namespace Server.Controllers
                     .AsSplitQuery()
                     .ToListAsync();
                 var response = _mapper.Map<IList<GroupModel>>(groups);
+
+                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                    .SetAbsoluteExpiration(TimeSpan.FromMinutes(15))
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(5));
+
+                _cache.Set(cacheKey, response, cacheEntryOptions);
+
                 return Ok(response);
             }
             catch (Exception e)
@@ -414,6 +439,13 @@ namespace Server.Controllers
 
                 if (changes > 0)
                 {
+                    var caffeId = await _db.Users
+                       .Where(u => u.Email == model.ApplicationUserEmail)
+                       .Select(u => u.CaffeId)
+                       .FirstOrDefaultAsync();
+                    string cacheKey = $"GetAllArticles:{caffeId}";
+                    _cache.Remove(cacheKey);
+
                     return Ok();
                 }
                 else
@@ -448,11 +480,20 @@ namespace Server.Controllers
                 {
                     return NotFound();
                 }
+                var caffeId = await _db.Articles
+                    .Where(a => a.Id == model.Id)
+                    .Select(a => a.Subgroup != null && a.Subgroup.Group != null
+                        ? a.Subgroup.Group.CaffeId
+                        : null)
+                    .FirstOrDefaultAsync();
+                
                 _db.Articles.Remove(model);
 
                 var changes = await _db.SaveChangesAsync();
                 if (changes > 0)
                 {
+                    string cacheKey = $"GetAllArticles:{caffeId}";
+                    _cache.Remove(cacheKey);
                     return NoContent();
                 }
                 else

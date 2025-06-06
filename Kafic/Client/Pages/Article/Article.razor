@@ -139,7 +139,7 @@
 
     private async Task HandleRegistration()
     {
-
+        Model.ApplicationUserEmail = userEmail;
         var result = await _repoArticle.AddArticle(Model);
         if (result)
         {

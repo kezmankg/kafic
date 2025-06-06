@@ -70,6 +70,7 @@
     private ArticleModel Model = new ArticleModel();
     private bool isSuccess = true;
     private string? message;
+    private string userEmail = string.Empty;
     private IList<GroupModel> AllGroupsWithSubgroups = new List<GroupModel>();
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
@@ -84,6 +85,7 @@
 
         if (user.Identity.IsAuthenticated)
         {
+            userEmail = user.Identity.Name;
             Model = await _repo.GetArticleById(Id);
             AllGroupsWithSubgroups = await _repo.GetAllGroupWithSubgroup(user.Identity.Name);
         }
@@ -94,6 +96,7 @@
     }
     private async Task HandleUserGroup()
     {
+        Model.ApplicationUserEmail = userEmail;
         var response = await _repo.UpdateArtile(Model);
 
         if (response)
