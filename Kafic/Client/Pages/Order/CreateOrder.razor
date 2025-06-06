@@ -62,22 +62,10 @@
                 <div class="row align-items-end mb-3">
                     <div class="col-md-6">
                         <label>Artikal</label>
-                        <InputSelect @bind-Value="article.Id" class="form-control">
-                            <option value="0">-- Izaberite artikal --</option>
-                            @foreach (var group in AllArticles)
-                            {
-                                @foreach (var subgroup in group.Subgroups)
-                                {
-                                    <optgroup label="@($"{group.Name} - {subgroup.Name}")">
-                                        @foreach (var artikal in subgroup.Articles)
-                                        {
-                                            <option value="@artikal.Id">@artikal.Name (@artikal.Price.ToString("F2")€)</option>
-                                        }
-                                    </optgroup>
-                                }
-                            }
-                        </InputSelect>
-                        <ValidationMessage For="@(() => article.Id)" class="error-message"/>
+                        <button type="button" class="btn btn-outline-secondary w-100 text-start" @onclick="() => OpenModalForArticle(article)">
+                            @GetArticleDisplay(article.Id)
+                        </button>
+                         <ValidationMessage For="@(() => article.Id)" class="text-danger" /> 
                     </div>
 
                     <div class="col-md-3">
@@ -100,6 +88,52 @@
             </div>
 
         </EditForm>
+        @if (showArticleModal)
+        {
+            <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Izaberite artikal</h5>
+                            <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                        </div>
+                        <div class="modal-body">
+                            @if (selectedGroup == null)
+                            {
+                                <h6>Izaberite grupu:</h6>
+                                @foreach (var group in AllArticles)
+                                {
+                                    <button class="btn btn-primary m-1" @onclick="() => SelectGroup(group)">@group.Name</button>
+                                }
+                            }
+                            else if (selectedSubgroup == null)
+                            {
+                                <h6>Izaberite podgrupu iz grupe <b>@selectedGroup.Name</b>:</h6>
+                                @foreach (var subgroup in selectedGroup.Subgroups)
+                                {
+                                    <button class="btn btn-secondary m-1" @onclick="() => SelectSubgroup(subgroup)">@subgroup.Name</button>
+                                }
+                                <div class="mt-3">
+                                    <button class="btn btn-sm btn-link" @onclick="() => selectedGroup = null">⟵ Nazad na grupe</button>
+                                </div>
+                            }
+                            else
+                            {
+                                <h6>Izaberite artikal iz podgrupe <b>@selectedSubgroup.Name</b>:</h6>
+                                @foreach (var artikal in selectedSubgroup.Articles)
+                                {
+                                    <button class="btn btn-outline-success m-1" @onclick="() => SelectArticle(artikal)">@artikal.Name (@artikal.Price.ToString("F2")€)</button>
+                                }
+                                <div class="mt-3">
+                                    <button class="btn btn-sm btn-link" @onclick="() => selectedSubgroup = null">⟵ Nazad na podgrupe</button>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
     </Authorized>
     <NotAuthorized>
         <p>Nemate pristup ovoj stranici.</p>
@@ -176,4 +210,58 @@
         _navManager.NavigateTo("/Order/");
     }
 
+
+    private ArticleModelOrder? currentArticle;
+    private bool showArticleModal = false;
+
+    private GroupModel? selectedGroup;
+    private SubgroupModel? selectedSubgroup;
+
+    private void OpenModalForArticle(ArticleModelOrder article)
+    {
+        currentArticle = article;
+        selectedGroup = null;
+        selectedSubgroup = null;
+        showArticleModal = true;
+    }
+
+    private void CloseModal()
+    {
+        showArticleModal = false;
+        currentArticle = null;
+        selectedGroup = null;
+        selectedSubgroup = null;
+    }
+
+    private void SelectGroup(GroupModel group)
+    {
+        selectedGroup = group;
+        selectedSubgroup = null;
+    }
+
+    private void SelectSubgroup(SubgroupModel subgroup)
+    {
+        selectedSubgroup = subgroup;
+    }
+
+    private void SelectArticle(ArticleModel selected)
+    {
+        if (currentArticle != null)
+        {
+            currentArticle.Id = selected.Id;
+            currentArticle.Name = selected.Name;
+            currentArticle.Price = selected.Price;
+        }
+        CloseModal();
+    }
+
+    private string GetArticleDisplay(int id)
+    {
+        var article = AllArticles
+            .SelectMany(g => g.Subgroups)
+            .SelectMany(sg => sg.Articles)
+            .FirstOrDefault(a => a.Id == id);
+
+        return article != null ? $"{article.Name} ({article.Price:F2}€)" : "-- Izaberite artikal --";
+    }
 }
