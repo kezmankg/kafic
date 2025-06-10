@@ -12,5 +12,6 @@ namespace Share.Models
         public DateTime DateTo { get; set; }
         public string UserEmail { get; set; } = string.Empty;
         public double TotalSum { get; set; }
+        public virtual IList<BillModel> BillModels { get; set; } = new List<BillModel>();
     }
 }

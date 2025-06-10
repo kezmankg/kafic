@@ -33,14 +33,14 @@
                     <div class="mt-3">
                         <h5>Ukupno vrednost porudžbina za konobara</h5>   
                         <EditForm Model="@turnoverUser" OnValidSubmit="HandleUserDateRangeSubmit" Context="EditForm2">
-                            <div class="form-group">
+                            @* <div class="form-group">
                                 <label>Datum od:</label>
                                 <InputDate @bind-Value="turnoverUser.DateFrom" class="form-control" />
                             </div>
                             <div class="form-group">
                                 <label>Datum do:</label>
                                 <InputDate @bind-Value="turnoverUser.DateTo" class="form-control" />
-                            </div>
+                            </div> *@
                             <div class="form-group mb-4">
                                 <label for="group">Izaberi konobara</label>
                                 <InputSelect @bind-Value="turnoverUser.UserEmail" class="form-control" id="group">
@@ -82,8 +82,39 @@
             <hr />
             <br />
             <div class="text-center">
-                 @messageFouUser
+                 @messageFouUser         
             </div>
+            @foreach (var bill in turnover.BillModels)
+            {
+                <div class="card my-3 p-3 border">
+                    <h5>@bill.DeskNo</h5>
+                    <p>Ukupni popust: @bill.Discount% | Ukupno: @bill.Price</p>
+
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Artikal</th>
+                                <th>Kolicina</th>
+                                <th>Cena</th>
+                                <th>Popust (%)</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var article in bill.ArticleModels)
+                            {
+                                <tr>
+                                    <td>@article.Name</td>
+                                    <td>@article.Amount</td>
+                                    <td>@article.Price.ToString("F2") €</td>
+                                    <td>@article.Discount</td>
+                                    <td>@article.TotalPrice.ToString("F2") €</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div> 
+            }
         
     </Authorized>
     <NotAuthorized>
@@ -99,6 +130,7 @@
     private bool isSuccess = true;
     private string? message;
     private string? messageFouUser;
+    TurnoverModel turnover = new TurnoverModel();
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
 
@@ -162,6 +194,7 @@
 
     private async Task HandleCurrentDay()
     {
+        turnover = new TurnoverModel();
         showDateFilter = false;
         showWaiterFilter = false;
         message = "";
@@ -190,15 +223,15 @@
             message = "Morate uneti konobara";
             return;
         }
-        var response = await _repo.GetTurnoverForUser(turnoverUser.DateFrom, turnoverUser.DateTo, turnoverUser.UserEmail);
+        var response = await _repo.GetTurnoverForUser(DateTime.Today, DateTime.Today.AddDays(1), turnoverUser.UserEmail);
 
         if (response != null)
         {
+            turnover = response;
             // Uspešno promenjeno
-            messageFouUser = "Promet od datuma: "
-            + response.DateFrom.ToString("dd.MM.yyyy") + " do datuma: "
-            + response.DateTo.ToString("dd.MM.yyyy") + " je: " + response.TotalSum.ToString("F2") + " €" + " za konobara: " 
-            + response.UserEmail;
+            messageFouUser = "Današnji promet je za konobara: "
+            + response.UserEmail
+            + " je: " + response.TotalSum.ToString("F2");
         }
         else
         {
@@ -208,11 +241,15 @@
     }
     public void ShowDateFilters()
     {
+        messageFouUser = " ";
+        turnover = new TurnoverModel();
         showDateFilter = true;
         showWaiterFilter = false;
     }
     public void ShowWaiterFilters()
     {
+        messageFouUser = " ";
+        turnover = new TurnoverModel();
         showDateFilter = false;
         showWaiterFilter = true;
     }

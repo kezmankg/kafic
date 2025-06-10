@@ -597,16 +597,50 @@ namespace Server.Controllers
                     CultureInfo.InvariantCulture
                 );
 
-                var totalPrice = _db.OrderPaids.Include(b => b.Bill)
+                var totalPrice = _db.Bills
                     .Where(b => b.Date >= dateFromDate && b.Date <= dateToDate && b.ApplicationUserEmail == userEmail)
-                    .Sum(b => b.TotalPrice);
+                    .Sum(b => b.Price);
 
+                var billsWithOrders = await _db.Bills
+                    .AsNoTracking()
+                    .Where(b => b.Date >= dateFromDate && b.Date <= dateToDate && b.ApplicationUserEmail == userEmail)
+                    .Include(b => b.OrderPaids)
+                        .ThenInclude(op => op.OrderArticles)
+                            .ThenInclude(oa => oa.Article)
+                    .AsSplitQuery()
+                    .ToListAsync();
+                List<BillModel> billModels = new List<BillModel>();
+                foreach(var bill in billsWithOrders)
+                {
+                    var groupedArticles = bill.OrderPaids
+                        .SelectMany(op => op.OrderArticles)
+                        .GroupBy(oa => new { oa.ArticleId, oa.Article!.Name, oa.Discount, oa.Article!.Price})
+                        .Select(g => new ArticleModelOrder
+                        {
+                            Name = g.Key.Name,
+                            Amount = g.Sum(oa => oa.Amount),
+                            Discount = g.Key.Discount,
+                            Price = g.Key.Price
+
+                        })
+                        .ToList();
+                    billModels.Add(new BillModel
+                    {
+                        ArticleModels = groupedArticles,
+                        DeskNo = bill.DeskNo,
+                        Discount = bill.Discount,
+                        Date = bill.Date,
+                        Price = bill.Price
+                    });
+
+                }
                 TurnoverModel turnoverModel = new TurnoverModel
                 {
                     DateFrom = dateFromDate,
                     DateTo = dateToDate,
                     TotalSum = totalPrice,
-                    UserEmail = userEmail
+                    UserEmail = userEmail,
+                    BillModels = billModels
                 };
                 return Ok(turnoverModel);
             }
