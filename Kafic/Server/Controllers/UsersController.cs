@@ -509,6 +509,63 @@ namespace Server.Controllers
             }
         }
 
+        [HttpGet("copyArticles/{sourceCaffeEmail}/{targetCaffeEmail}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task CopyGroupsAndArticlesAsync(string sourceCaffeEmail, string targetCaffeEmail)
+        {
+            var sourceCaffeId = await _db.Users
+                    .Where(u => u.Email == sourceCaffeEmail)
+                    .Select(u => u.CaffeId)
+                    .FirstOrDefaultAsync();
+            var targetCaffeId = await _db.Users
+                    .Where(u => u.Email == targetCaffeEmail)
+                    .Select(u => u.CaffeId)
+                    .FirstOrDefaultAsync();
+
+            var sourceGroups = await _db.Groups
+                .Include(g => g.Subgroups)
+                    .ThenInclude(sg => sg.Articles)
+                .Where(g => g.CaffeId == sourceCaffeId)
+                .ToListAsync();
+
+            foreach (var sourceGroup in sourceGroups)
+            {
+                var newGroup = new Group
+                {
+                    Name = sourceGroup.Name,
+                    CaffeId = targetCaffeId,
+                    Subgroups = new List<Subgroup>()
+                };
+
+                foreach (var sourceSubgroup in sourceGroup.Subgroups)
+                {
+                    var newSubgroup = new Subgroup
+                    {
+                        Name = sourceSubgroup.Name,
+                        Articles = new List<Article>()
+                    };
+
+                    foreach (var sourceArticle in sourceSubgroup.Articles)
+                    {
+                        var newArticle = new Article
+                        {
+                            Name = sourceArticle.Name,
+                            Price = sourceArticle.Price
+                        };
+
+                        newSubgroup.Articles.Add(newArticle);
+                    }
+
+                    newGroup.Subgroups.Add(newSubgroup);
+                }
+
+                _db.Groups.Add(newGroup);
+            }
+
+            await _db.SaveChangesAsync();
+        }
+
         private async Task<string> GenerateJSONWebToken(ApplicationUser user)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
